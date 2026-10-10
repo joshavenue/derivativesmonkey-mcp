@@ -101,7 +101,7 @@ export function registerMetaTools(server: McpServer): void {
     {
       title: "Sign in to Derivatives Monkey",
       description:
-        "Opens a browser window on derivativesmonkey.com where the USER signs in themselves (Google/email); the password never passes through this server or the agent. Waits up to 5 min, then saves the session locally (0600) so signed-in views ([SIGNED-IN] in tool descriptions, e.g. dm_quant regime/direction/anomalies, dm_backtest v2) work. Tell the user a window is opening and to sign in there. Public tools never need this.",
+        "Opens a browser window on derivativesmonkey.com/btc/strategy and clicks SIGN IN; the USER then signs in themselves (Google/email). Credentials never pass through this server or the agent. Waits up to 5 min, then saves the session locally (0600) so [SIGNED-IN] views work (dm_quant regime/direction/diagnostics/anomalies, dm_markets venue_uptime). Tokens then renew automatically. Tell the user a window is opening and to sign in there. Public tools never need this.",
       inputSchema: { timeoutSeconds: z.number().int().min(30).max(900).optional().describe("How long to wait for the sign-in (default 300).") },
       openWorld: true,
     },

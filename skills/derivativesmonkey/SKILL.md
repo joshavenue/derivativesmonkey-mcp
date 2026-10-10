@@ -62,11 +62,11 @@ Unsure which tool fits? `dm_coverage` with `topic` (e.g. `max pain`, `funding`, 
 
 ## Signed-in features
 
-Most data is public. Views tagged `[SIGNED-IN]` (dm_quant regime/direction/diagnostics/anomalies, dm_backtest v2_meta/v2_hedge) need a Derivatives Monkey account:
+Most data is public. Views tagged `[SIGNED-IN]` (dm_quant regime/direction/diagnostics/anomalies, dm_markets venue_uptime, dm_backtest v2_meta/v2_hedge) need a Derivatives Monkey account:
 
 1. `dm_auth_status`. If not signed in, ask the user, then call `dm_login`.
 2. `dm_login` opens a browser window. Tell the user to sign in there themselves. Never ask for or handle their password.
-3. A 401 with hint "session expired" means calling `dm_login` again.
+3. Tokens renew automatically (a headless re-sign-in with the remembered profile). A 401 with hint "session expired" means renewal failed: ask the user, then call `dm_login` again.
 
 ## Reading the numbers
 

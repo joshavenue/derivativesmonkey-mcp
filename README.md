@@ -51,9 +51,11 @@ The agent guide (tool picking, units, workflows) is [skills/derivativesmonkey/SK
 
 ## Signing in (optional)
 
-Almost everything is public, and you do not need an account. The site hides its sign-in: the only entry is the "Sign in required" pop-up on `/btc/strategy`. Signed-in views: `dm_quant` regime/direction/diagnostics/anomalies and `dm_backtest` v2_meta/v2_hedge.
+Almost everything is public, and you do not need an account. The site hides its sign-in: the only entry is the "Sign in required" pop-up on `/btc/strategy`. Signed-in views: `dm_quant` regime/direction/diagnostics/anomalies (verified 2026-10-10), `dm_markets` venue_uptime, and `dm_backtest` v2_meta/v2_hedge (v2_meta returned HTTP 500 upstream on 2026-10-10).
 
-`dm_login` opens a Chrome window (falling back to Brave, then Playwright Chromium) with a dedicated profile in `~/.config/derivativesmonkey-mcp/browser-profile`. You sign in there yourself, and the password never passes through the server. When the site's own auth call succeeds, the server saves the session cookie to `~/.config/derivativesmonkey-mcp/session.json` (mode 0600). It then mints fresh tokens through the site's `POST /auth/refresh`. `dm_logout` deletes the session; `forgetBrowser: true` also deletes the profile. Signed-in responses are never cached.
+`dm_login` opens a Chrome window (falling back to Brave, then Playwright Chromium) on `/btc/strategy` with a dedicated profile in `~/.config/derivativesmonkey-mcp/browser-profile`, and clicks the pop-up's SIGN IN. You finish the sign-in there yourself (Google, email, ...); credentials never pass through the server. When the site makes its first authenticated call, the server saves the token and site cookies to `~/.config/derivativesmonkey-mcp/session.json` (mode 0600) and closes the window.
+
+Renewal is automatic. Accounts that sign in with email/password get the site's refresh cookie (`POST /auth/refresh`). Auth0/Google accounts get a 24-hour token. When it expires, the server reopens the same profile headless and clicks SIGN IN again (about 4 s), which works as long as the identity provider still remembers you. Set `DM_NO_SILENT_RENEW=1` to turn that off. If renewal fails, the tools return a 401 with the hint to call `dm_login` again. `dm_logout` deletes the session; `forgetBrowser: true` also deletes the profile. Signed-in responses are never cached.
 
 Do not expose the HTTP transport beyond localhost while signed in: anyone who can reach it would use your session.
 
@@ -66,7 +68,7 @@ Do not expose the HTTP transport beyond localhost while signed in: anyone who ca
 
 ## Environment
 
-`DM_TIMEOUT_MS` (30000), `DM_MAX_CONCURRENCY` (3), `DM_MIN_INTERVAL_MS` (250), `DM_CACHE_TTL_MS` (15000), `DM_LONG_CACHE_TTL_MS` (300000), `DM_MAX_RESULT_CHARS` (40000), `DM_TOOLS` (comma list with `*` wildcards to register a subset), `DM_CONFIG_DIR`, `DM_LOGIN_TIMEOUT_MS`.
+`DM_TIMEOUT_MS` (30000), `DM_MAX_CONCURRENCY` (3), `DM_MIN_INTERVAL_MS` (250), `DM_CACHE_TTL_MS` (15000), `DM_LONG_CACHE_TTL_MS` (300000), `DM_MAX_RESULT_CHARS` (40000), `DM_TOOLS` (comma list with `*` wildcards to register a subset), `DM_CONFIG_DIR`, `DM_LOGIN_TIMEOUT_MS`, `DM_NO_SILENT_RENEW`. `npm run login` runs the sign-in from a terminal.
 
 ## Layout
 

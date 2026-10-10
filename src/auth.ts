@@ -29,7 +29,7 @@ type Session = {
   bearer?: string;
   savedAtIso: string;
 };
-export type Claims = { email?: string; role?: string; sub?: string; origin?: string; exp?: number };
+export type Claims = { email?: string; role?: string; sub?: string; origin?: string; exp?: number; iss?: string };
 
 let token: { value: string; exp: number } | null = null;
 
@@ -104,15 +104,16 @@ export async function getAccessToken(): Promise<string> {
   if (token && token.exp - 60 > now) return token.value;
   const session = readSession();
   if (!session) throw new DmError("Not signed in to Derivatives Monkey", 401, "/auth/refresh", undefined, false, "Call dm_login: it opens a browser window where the user signs in themselves.");
-  const fresh = await refreshWithCookies(session).catch(() => null);
-  const candidate = fresh ?? session.bearer ?? null;
-  const exp = candidate ? (decodeJwt(candidate).exp ?? now + 300) : 0;
-  if (!candidate || exp - 30 <= now) {
+  const usable = (t: string | null | undefined) => Boolean(t) && (decodeJwt(t!).exp ?? now + 300) - 30 > now;
+  let candidate: string | null = (await refreshWithCookies(session).catch(() => null)) ?? session.bearer ?? null;
+  if (!usable(candidate) && (await silentRenew())) candidate = readSession()?.bearer ?? null;
+  if (!usable(candidate)) {
     token = null;
-    throw new DmError("Derivatives Monkey session expired", 401, "/auth/refresh", undefined, false, "Call dm_login again to sign in (the browser profile usually remembers the account).");
+    throw new DmError("Derivatives Monkey session expired", 401, "/auth/refresh", undefined, false, "Call dm_login: the user signs in again in the browser window.");
   }
-  token = { value: candidate, exp };
-  return candidate;
+  const exp = decodeJwt(candidate!).exp ?? now + 300;
+  token = { value: candidate!, exp };
+  return candidate!;
 }
 
 export async function authStatus(): Promise<Record<string, unknown>> {
@@ -123,10 +124,11 @@ export async function authStatus(): Promise<Record<string, unknown>> {
     const c = decodeJwt(t);
     return {
       signedIn: true,
-      email: c.email ?? null,
-      role: c.role ?? null,
+      ...(c.email ? { email: c.email } : {}),
+      ...(c.role ? { role: c.role } : {}),
+      identityProvider: (c as { iss?: string }).iss ?? null,
       tokenExpiresIso: c.exp ? new Date(c.exp * 1000).toISOString() : null,
-      refreshable: session.cookies.length > 0,
+      renewal: "automatic: the site's refresh cookie if present, otherwise a headless sign-in with the remembered browser profile; dm_login if both fail",
       sessionSavedAtIso: session.savedAtIso,
     };
   } catch (err) {
@@ -150,17 +152,22 @@ const BROWSERS: Array<{ label: string; opts: Record<string, unknown> }> = [
   { label: "Playwright Chromium", opts: {} },
 ];
 
+type BrowserRun = { ok: boolean; reason?: string; browser: string };
+
 /**
- * Open a visible browser on derivativesmonkey.com and wait until the user has
- * signed in (the site's own /auth/login, /auth/refresh or /api/auth/sync
- * succeeds). Then save the session cookies and close the browser.
+ * Open the dedicated browser profile on /btc/strategy (the only page with a
+ * sign-in entry), click its SIGN IN button, and wait until the site's own auth
+ * succeeds: a Bearer token on an API request, or /auth/login|refresh|sync
+ * answering. Visible for dm_login (the user types their credentials there);
+ * headless for silent renewal, which only works while the identity provider
+ * still remembers the user (no credentials are ever entered by this code).
  */
-export async function login(timeoutMs = LOGIN_TIMEOUT_MS): Promise<Record<string, unknown>> {
+async function browserSignIn(headless: boolean, timeoutMs: number): Promise<BrowserRun> {
   let pw: typeof import("playwright-core");
   try {
     pw = await import("playwright-core");
   } catch {
-    throw new DmError("dm_login needs the optional dependency playwright-core (npm install playwright-core)", null, "/auth/login");
+    throw new DmError("Signing in needs the optional dependency playwright-core (npm install playwright-core)", null, "/auth/login");
   }
   mkdirSync(PROFILE_DIR, { recursive: true, mode: 0o700 });
   let context: import("playwright-core").BrowserContext | null = null;
@@ -168,7 +175,7 @@ export async function login(timeoutMs = LOGIN_TIMEOUT_MS): Promise<Record<string
   const errors: string[] = [];
   for (const b of BROWSERS) {
     try {
-      context = await pw.chromium.launchPersistentContext(PROFILE_DIR, { headless: false, viewport: null, ...b.opts });
+      context = await pw.chromium.launchPersistentContext(PROFILE_DIR, { headless, viewport: null, ...b.opts });
       used = b.label;
       break;
     } catch (err) {
@@ -192,7 +199,10 @@ export async function login(timeoutMs = LOGIN_TIMEOUT_MS): Promise<Record<string
     try {
       if (new URL(req.url()).host !== DM_HOST) return;
       const h = req.headers()["authorization"];
-      if (h?.startsWith("Bearer ")) bearer = h.slice(7);
+      if (h?.startsWith("Bearer ")) {
+        bearer = h.slice(7);
+        done?.();
+      }
     } catch {
       /* ignore */
     }
@@ -209,25 +219,46 @@ export async function login(timeoutMs = LOGIN_TIMEOUT_MS): Promise<Record<string
   });
 
   const page = context.pages()[0] ?? (await context.newPage());
-  await page.goto(`${DM_BASE_URL}/btc/dashboard`).catch(() => {});
+  await page.goto(`${DM_BASE_URL}/btc/strategy`).catch(() => {});
+  // Click the pop-up's SIGN IN (a navigation to the identity provider; nothing is typed).
+  void page
+    .getByRole("button", { name: /^sign in$/i })
+    .first()
+    .click({ timeout: 15_000 })
+    .catch(() => {});
   const closed = new Promise<void>((r) => context!.on("close", () => r()));
   const timer = new Promise<"timeout">((r) => setTimeout(() => r("timeout"), timeoutMs));
   const outcome = await Promise.race([signedIn.then(() => "ok" as const), closed.then(() => "closed" as const), timer]);
 
   if (outcome !== "ok") {
     await context.close().catch(() => {});
-    return {
-      signedIn: false,
-      reason: outcome === "closed" ? "The browser window was closed before signing in." : `No sign-in within ${Math.round(timeoutMs / 1000)} s.`,
-      browser: used,
-    };
+    return { ok: false, browser: used, reason: outcome === "closed" ? "The browser window was closed before signing in." : `No sign-in within ${Math.round(timeoutMs / 1000)} s.` };
   }
   await new Promise((r) => setTimeout(r, 1500)); // let the site finish setting its cookies
   const cookies = (await context.cookies(DM_BASE_URL)).map((c) => ({ name: c.name, value: c.value, path: c.path, expires: c.expires }));
-  // Close before our own refresh so the page cannot rotate the cookie underneath us.
+  // Close before any refresh of ours so the page cannot rotate a cookie underneath us.
   await context.close().catch(() => {});
   writeSession({ cookies, bearer, savedAtIso: new Date().toISOString() });
   token = null;
-  const status = await authStatus();
-  return { ...status, browser: used, note: "Session saved locally (0600). The password was entered only in the browser window." };
+  return { ok: true, browser: used };
+}
+
+/** Visible sign-in for dm_login: the user completes the identity provider's form themselves. */
+export async function login(timeoutMs = LOGIN_TIMEOUT_MS): Promise<Record<string, unknown>> {
+  const run = await browserSignIn(false, timeoutMs);
+  if (!run.ok) return { signedIn: false, reason: run.reason, browser: run.browser };
+  return { ...(await authStatus()), browser: run.browser, note: "Session saved locally (0600). Credentials were entered only in the browser window." };
+}
+
+let renewing: Promise<boolean> | null = null;
+/** Headless renewal through the remembered identity-provider session; false if the user must sign in again. */
+export function silentRenew(): Promise<boolean> {
+  if (process.env.DM_NO_SILENT_RENEW === "1") return Promise.resolve(false);
+  renewing ??= browserSignIn(true, 45_000)
+    .then((r) => r.ok)
+    .catch(() => false)
+    .finally(() => {
+      renewing = null;
+    });
+  return renewing;
 }
