@@ -1,0 +1,6350 @@
+[
+ {
+  "path": "/api/market/sources-all",
+  "method": "GET",
+  "group": "meta",
+  "description": "Catalog of every underlying the backend knows (crypto + ~30 equities/ETFs) with the venues that list options for it and the default venue. Bootstrap for the SPA; use it to validate asset/source combos.",
+  "notes": "",
+  "pages": [
+   "(all - bootstrap)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 394,
+  "size_bytes": 3243,
+  "response_shape": "{assets:{aapl:{sources:[1 x str],default_source:str},aave:{sources:[1 x str],default_source:str},amd:{sources:[1 x str],default_source:str},amzn:{sources:[1 x str],default_source:str},avax:{sources:[1 x str],default_source:str},avgo:{sources:[1 x str],default_source:str},bnb:{sources:[2 x str],default_source:str},btc:{sources:[12 x str],default_source:str},cper:{sources:[1 x str],default_source:str},doge:{sources:[3 x str],default_source:str},ena:{sources:[1 x str],default_source:str},eth:{sources:[12 x str],default_source:str},gld:{sources:[1 x str],default_source:str},hype:{sources:[5 x str],default_source:str},ibit:{sources:[1 x str],default_source:str},intc:{sources:[1 x str],default_source:str},iwm:{sources:[1 x str],default_source:str},kas:{sources:[1 x str],default_source:str},lit:{sources:[1 x str],default_source:str},mnt:{sources:[1 x str],default_source:str},msft:{sources:[1 x str],default_source:str},mstr:{sources:[1 x str],default_source:str},mu:{sources:[1 x str],default_source:str},nu:{sources:[1 x str],default_source:str},nvda:{sources:[1 x str],default_source:str},ordi:{sources:[1 x str],default_source:str},pltr:{sources:[1 x str],default_source:str},pump:{sources:[",
+  "params": []
+ },
+ {
+  "path": "/api/market/expiries",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "List of listed expiry dates (ISO YYYY-MM-DD, ascending) for one venue+asset.",
+  "notes": "Unknown source -> 400 listing valid sources: aevo, binance, bullish, bybit, callput, coincall, delta, deribit, derive, hypercall, okx, paradex, thalex, thetadata. Source names must be lowercase.",
+  "pages": [
+   "dashboard",
+   "calculator",
+   "greeks",
+   "open-interest",
+   "divergence"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 247,
+  "size_bytes": 189,
+  "response_shape": "{source:str,expiries:[12 x str]}",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": true,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/expiries-all",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Map venue -> list of expiry dates for the asset (all venues in one call; venues with no listing return []).",
+  "notes": "",
+  "pages": [
+   "dashboard",
+   "gex-profile",
+   "heatmaps"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 254,
+  "size_bytes": 1879,
+  "response_shape": "{derive:[12 x str],deribit:[12 x str],binance:[11 x str],bybit:[12 x str],okx:[13 x str],thalex:[9 x str],paradex:[14 x str],aevo:[12 x str],delta:[8 x str],bullish:[17 x str],coincall:[],hypercall:[7 x str],callput:[5 x str],thetadata:[]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/expiries-classified",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Expiries for a venue with classification: type (daily/weekly/monthly/quarterly...) and dte (int days).",
+  "notes": "",
+  "pages": [
+   "greek-exposure"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 250,
+  "size_bytes": 611,
+  "response_shape": "{asset:str,source:str,expiries:[12 x {date:str,type:str,dte:int}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/chain",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Option chain for one venue+expiry, one row per strike with nested call/put objects (19 fields each: mark/bid/ask, IV, greeks, OI, volume, 24h change...). Prices for coin-margined venues (deribit btc/eth, okx) are in coin units; see mark_usd in chain-latest.",
+  "notes": "",
+  "pages": [
+   "dashboard",
+   "expiry",
+   "calculator",
+   "strategy"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 571,
+  "size_bytes": 23829,
+  "response_shape": "{provenance:{source:str,expiry_date:str,count:int,ts_ms_min:int,ts_ms_max:int},rows:[30 x {strike:float,call:{...19 keys},put:{...19 keys}}]}",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": true,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/chain-latest",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Full latest snapshot of every listed option instrument for a venue (flat rows: mark_price, mark_iv, bid_iv/ask_iv, delta/gamma/theta/vega, open_interest, underlying_price, mark_usd). ~300 KB for BTC/deribit.",
+  "notes": "",
+  "pages": [
+   "dashboard",
+   "scanner",
+   "builder/*",
+   "ibit/surface",
+   "ibit/vol"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1105,
+  "size_bytes": 309661,
+  "response_shape": "{provenance:{source:str,count:int,ts_ms_min:int,ts_ms_max:int},rows:[938 x {instrument:str,expiry_date:str,strike:float,option_type:str,ts_ms:int,mark_price:float,mark_iv:float,delta:float,gamma:float,theta:float,vega:float,open_interest:float,underlying_price:float,bid_iv:float,ask_iv:float,mark_usd:float}]}",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": true,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/chain-history",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Time series (default last 24 h) of mark price / mark IV / underlying for a single instrument name.",
+  "notes": "",
+  "pages": [
+   "scanner",
+   "builder/*",
+   "instrument"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 486,
+  "size_bytes": 2795,
+  "response_shape": "{instrument:str,source:str,points:[25 x {ts_ms:int,mark_price:float,mark_iv:float,underlying_price:float,open_interest:float}]}",
+  "params": [
+   {
+    "name": "instrument",
+    "type": "string",
+    "required": true,
+    "desc": "instrument name as in chain/orderbook",
+    "example": "BTC-11OCT26-83000-C"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "hours",
+    "type": "int",
+    "required": false,
+    "default": 24,
+    "example": 24
+   }
+  ]
+ },
+ {
+  "path": "/api/market/gex",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Per-strike gamma exposure for one venue+expiry: call_gex, put_gex, net_gex (+ 'corrected' variants when view=corrected and taker-flow imbalance fields).",
+  "notes": "view must be 'standard' or 'corrected' (400/422 otherwise).",
+  "pages": [
+   "gex",
+   "gex-profile",
+   "dashboard"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 272,
+  "size_bytes": 6574,
+  "response_shape": "{provenance:{source:str,expiry_date:str,count:int,ts_ms_min:int,ts_ms_max:int},rows:[30 x {strike:float,call_gex:float,put_gex:float,net_gex:float,corrected_call_gex:null,corrected_put_gex:null,corrected_net_gex:null,taker_imbalance:null,taker_trades:null}],spot:float,taker_window_h:null,taker_coverage:null}",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": true,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "view",
+    "type": "string",
+    "required": false,
+    "default": "standard",
+    "allowed": [
+     "standard",
+     "corrected"
+    ],
+    "desc": "GEX sign convention variant",
+    "example": "standard"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/gex-profile",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Strike-by-strike OI-based gamma exposure profile aggregated across expiries (and venues if several): items[{strike,source,call_gex,put_gex,net_gex,...}] plus spot.",
+  "notes": "",
+  "pages": [
+   "gex-profile",
+   "levels",
+   "dashboard"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 584,
+  "size_bytes": 15503,
+  "response_shape": "{sources:[1 x str],spot:float,items:[91 x {strike:float,source:str,call_gex:float,put_gex:float,net_gex:float,corrected_net_gex:null,taker_coverage:null}]}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "view",
+    "type": "string",
+    "required": false,
+    "default": "standard",
+    "allowed": [
+     "standard",
+     "corrected"
+    ],
+    "desc": "GEX sign convention variant",
+    "example": "standard"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/gex-profile-live",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Live bundle used by the chart overlay: oi_profile (per-strike OI + max_pain + P/C summary) and gamma_flip (flip strike + GEX profile) in one response.",
+  "notes": "",
+  "pages": [
+   "chart overlays (gex-levels indicator)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 440,
+  "size_bytes": 27899,
+  "response_shape": "{oi_profile:{sources:[1 x str],items:[91 x {...8 keys}],spot:float,max_pain:float,summary:{calls_oi:float,puts_oi:float,calls_notional_usd:float,puts_notional_usd:float,calls_market_value_usd:float,puts_market_value_usd:float,total_market_value_usd:float,total_intrinsic_usd:float,pc_ratio:float}},gamma_flip:{sources:[1 x str],spot:float,flip_strike:float,distance_usd:float,distance_pct:float,regime:str,gex_profile:[89 x {...3 keys}]},computed_at_ms:int}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "expiry",
+    "type": "string",
+    "required": false,
+    "desc": "one or more expiries (comma list); omitted = all",
+    "example": "2026-10-11"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/gex-strike-heatmap",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Time x strike GEX heatmap: time_grid (ISO), strike_grid, gex matrix [time][strike], spot_now, window_hours (default 24) and price_band (+/- fraction of spot).",
+  "notes": "",
+  "pages": [
+   "gex-profile",
+   "heatmaps"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 4773,
+  "size_bytes": 83661,
+  "response_shape": "{expiry:null,sources:[1 x str],window_hours:int,aggregation_minutes:int,view:str,price_band:float,resolution_minutes:int,coarse_fallback:bool,spot_now:float,time_grid:[144 x str],strike_grid:[29 x float],gex:[144 x [29 x float]],instruments_count:int,as_of_ms:int}",
+  "params": [
+   {
+    "name": "expiry",
+    "type": "string",
+    "required": false,
+    "example": "2026-10-11"
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "window_hours",
+    "type": "int",
+    "required": false,
+    "example": 24
+   },
+   {
+    "name": "price_band",
+    "type": "float",
+    "required": false,
+    "desc": "+/- fraction of spot",
+    "example": 0.1
+   },
+   {
+    "name": "view",
+    "type": "string",
+    "required": false,
+    "default": "standard",
+    "allowed": [
+     "standard",
+     "corrected"
+    ],
+    "desc": "GEX sign convention variant",
+    "example": "standard"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/gamma-flip",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Gamma flip level: flip_strike, distance to spot (usd/pct), regime (long_gamma/short_gamma) and the net GEX profile by strike.",
+  "notes": "",
+  "pages": [
+   "levels",
+   "gex-profile",
+   "dashboard"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 250,
+  "size_bytes": 6281,
+  "response_shape": "{sources:[1 x str],spot:float,flip_strike:float,distance_usd:float,distance_pct:float,regime:str,gex_profile:[89 x {strike:float,net_gex:float,corrected_net_gex:null}]}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "view",
+    "type": "string",
+    "required": false,
+    "default": "standard",
+    "allowed": [
+     "standard",
+     "corrected"
+    ],
+    "desc": "GEX sign convention variant",
+    "example": "standard"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/greek-exposure-projection",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Large projection grids of dealer gamma/charm/vanna exposure over a spot grid (s_grid) x future time (timestamps): gamma_matrix, charm_matrix, vanna_matrix + gamma_flip/charm_neutral/vanna_neutral prices. 1.5-1.9 MB, 2-5 s.",
+  "notes": "bucket and agg are NOT validated (invalid values return 200 with default). Frontend uses expiry_filter+agg single|cumulative.",
+  "pages": [
+   "greek-exposure"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 3690,
+  "size_bytes": 1510961,
+  "response_shape": "{asset:str,source:str,spot:float,computed_at:str,timestamps:[326 x str],anchor_ts:int,projection_start_idx:int,spot_history:[14 x {t:int,o:float,h:float,l:float,c:float}],s_grid:[167 x float],gamma_matrix:[167 x [326 x float]],charm_matrix:[167 x [326 x float]],vanna_matrix:[167 x [326 x float]],gamma_flip_price:float,charm_neutral_price:float,vanna_neutral_price:float,options_used:int,t_grid:[10 x int],gamma_meta:{label:str,z_min:float,z_max:float,contour_levels:[5 x float],hedgeometer_usd:float,hedgeometer_coin:float},charm_meta:{label:str,z_min:float,z_max:float,contour_levels:[5 x float],hedgeometer_usd:float,hedgeometer_coin:float},vanna_meta:{label:str,z_min:float,z_max:float,contour_levels:[5 x float],hedgeometer_usd:float,hedgeometer_coin:float},strike_rows:[25 x {strike:float,call_oi:float,put_oi:float,gamma:float,charm:float,vanna:float}],flow_coverage:{pct_flow_signed:float,avg_confidence:float,trade_count:float,flipped:float,instruments_signed:float,instruments_with_flow:float},expiry_boundaries:[1 x {date:str,col_idx:int}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "expiry_filter",
+    "type": "string",
+    "required": false,
+    "desc": "single expiry (use with agg)",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "bucket",
+    "type": "string",
+    "required": false,
+    "desc": "DTE bucket filter"
+   },
+   {
+    "name": "agg",
+    "type": "string",
+    "required": false,
+    "default": "single",
+    "allowed": [
+     "single",
+     "cumulative"
+    ],
+    "example": "single"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/thermography",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Strike x expiry heat grid of one greek exposure (cells[{strike,expiry_date,call_value,put_value,net_value}]) for the chosen greek.",
+  "notes": "",
+  "pages": [
+   "thermography"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 2310,
+  "size_bytes": 67361,
+  "response_shape": "{asset:str,sources:[12 x str],greek:str,spot:float,computed_at:str,strike_bins:[40 x float],expiry_dates:[15 x str],cells:[600 x {strike:float,expiry_date:str,call_value:float,put_value:float,net_value:float}],spot_strike_coverage:float}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "greek",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "gamma_exposure",
+     "vanna_exposure",
+     "charm_exposure",
+     "vega_exposure"
+    ],
+    "example": "gamma"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/oi-strike-heatmap",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Open-interest history heatmap: times (epoch s), s_grid (strikes), matrix[strike][time], spot_history OHLC, bucket (auto: 4h for ~97 d). ~490 KB, 2.7 s warm but timed out at 30 s on a cold first call with default sources.",
+  "notes": "Cold first call with default sources timed out at 30 s; subsequent sources=deribit call took ~2.7 s. Use a client timeout >= 60 s.",
+  "pages": [
+   "open-interest",
+   "heatmaps"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 2715,
+  "size_bytes": 489975,
+  "response_shape": "{asset:str,sources:[1 x str],source:str,spot:float,computed_at:str,anchor_ts:int,anchor_idx:int,times:[583 x int],s_grid:[118 x float],matrix:[118 x [583 x float]],abs_max:float,spot_history:[583 x {t:int,o:float,h:float,l:float,c:float}],spot_sources:[1 x str],bucket:str,bucket_minutes:int,span_days:float,full_history:bool,instruments_used:int,strikes_used:int,coverage:float,stale_sources:[]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "bucket",
+    "type": "string",
+    "required": false,
+    "default": "auto",
+    "desc": "strike bucket width",
+    "example": "auto"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/oi-profile",
+  "method": "GET",
+  "group": "oi",
+  "description": "Open interest per strike (calls_oi/puts_oi, market value and intrinsic USD) for the selected venues/expiry, plus spot, max_pain and summary.",
+  "notes": "",
+  "pages": [
+   "open-interest",
+   "levels"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 438,
+  "size_bytes": 20721,
+  "response_shape": "{sources:[1 x str],items:[91 x {strike:float,source:str,calls_oi:float,puts_oi:float,calls_market_value_usd:float,puts_market_value_usd:float,calls_intrinsic_usd:float,puts_intrinsic_usd:float}],spot:float,max_pain:float,summary:{calls_oi:float,puts_oi:float,calls_notional_usd:float,puts_notional_usd:float,calls_market_value_usd:float,puts_market_value_usd:float,total_market_value_usd:float,total_intrinsic_usd:float,pc_ratio:float}}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "expiry",
+    "type": "string",
+    "required": false,
+    "example": "2026-10-11"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/oi-profile-live",
+  "method": "GET",
+  "group": "oi",
+  "description": "Same shape as oi-profile but computed from the live (less cached) snapshot; the SPA polls it every ~5 s.",
+  "notes": "",
+  "pages": [
+   "open-interest",
+   "oi-profile"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 633,
+  "size_bytes": 20703,
+  "response_shape": "{sources:[1 x str],items:[91 x {strike:float,source:str,calls_oi:float,puts_oi:float,calls_market_value_usd:float,puts_market_value_usd:float,calls_intrinsic_usd:float,puts_intrinsic_usd:float}],spot:float,max_pain:float,summary:{calls_oi:float,puts_oi:float,calls_notional_usd:float,puts_notional_usd:float,calls_market_value_usd:float,puts_market_value_usd:float,total_market_value_usd:float,total_intrinsic_usd:float,pc_ratio:float}}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "expiry",
+    "type": "string",
+    "required": false,
+    "example": "2026-10-11"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/oi-by-expiry",
+  "method": "GET",
+  "group": "oi",
+  "description": "Open interest (calls/puts/total) per expiry, per venue.",
+  "notes": "",
+  "pages": [
+   "open-interest"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 710,
+  "size_bytes": 1515,
+  "response_shape": "{sources:[1 x str],items:[12 x {expiry_date:str,source:str,calls_oi:float,puts_oi:float,total_oi:float}]}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/oi-by-type",
+  "method": "GET",
+  "group": "oi",
+  "description": "Total call OI, put OI and put/call ratio per venue.",
+  "notes": "",
+  "pages": [
+   "open-interest"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 488,
+  "size_bytes": 142,
+  "response_shape": "{sources:[1 x str],items:[1 x {source:str,calls_oi:float,puts_oi:float,pc_ratio:float}]}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/oi-change",
+  "method": "GET",
+  "group": "oi",
+  "description": "OI change over lookback_hours per venue: total_oi, oi_24h_ago, delta_oi/pct, by_expiry and by_expiry_change maps (calls/puts split with breakdown=calls_puts).",
+  "notes": "",
+  "pages": [
+   "open-interest"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 262,
+  "size_bytes": 994,
+  "response_shape": "{sources:[1 x str],rows:[1 x {source:str,total_oi:float,oi_24h_ago:float,delta_oi:float,delta_pct:float,by_expiry:{...12 keys},by_expiry_change:{...12 keys},by_expiry_calls:null,by_expiry_puts:null,by_expiry_change_calls:null,by_expiry_change_puts:null}]}",
+  "params": [
+   {
+    "name": "lookback_hours",
+    "type": "int",
+    "required": false,
+    "default": 24,
+    "example": 24
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "breakdown",
+    "type": "string",
+    "required": false,
+    "default": "total",
+    "allowed": [
+     "total",
+     "calls_puts"
+    ],
+    "example": "total"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/dealer-positioning",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Dealer GEX/VEX/DEX by strike and by expiry using trade-flow signing (flow) or naive signing; includes flow_coverage stats.",
+  "notes": "signing not validated (invalid value 200).",
+  "pages": [
+   "levels",
+   "dashboard"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1218,
+  "size_bytes": 18171,
+  "response_shape": "{asset:str,sources:[1 x str],spot:float,signing:str,by_strike:[91 x {strike:float,gex:float,vex:float,dex:float,call_oi:float,put_oi:float,flow_signed:bool,confidence:float,flipped:bool}],by_expiry:[12 x {expiry:str,dte:int,net_gex:float,net_dex:float,net_vex:float,call:{...4 keys},put:{...4 keys},signing_used:str,pct_signed:float,avg_confidence:float}],flow_coverage:{pct_flow_signed:float,avg_confidence:float,trade_count:float,flipped:float,instruments_signed:float,instruments_with_flow:float},generated_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "expiry",
+    "type": "string",
+    "required": false,
+    "default": "all",
+    "example": "all"
+   },
+   {
+    "name": "signing",
+    "type": "string",
+    "required": false,
+    "default": "flow",
+    "allowed": [
+     "flow",
+     "naive?(unverified, not validated server-side)"
+    ],
+    "desc": "dealer sign convention",
+    "example": "flow"
+   },
+   {
+    "name": "window_hours",
+    "type": "int",
+    "required": false,
+    "example": 24
+   }
+  ]
+ },
+ {
+  "path": "/api/market/higher-greeks",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Higher-order greek exposure per strike (speed, zomma, color) summed over OI for all expiries or one.",
+  "notes": "asset is uppercased by the SPA; lowercase also works.",
+  "pages": [
+   "greek-exposure/higher-greeks"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 337,
+  "size_bytes": 13042,
+  "response_shape": "{asset:str,expiry_filter:str,spot_price:float,strikes:[91 x {strike:float,speed_net:float,zomma_net:float,color_net:float,oi_total:float}],computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "expiry",
+    "type": "string",
+    "required": false,
+    "desc": "omit = all"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/vanna",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Vanna exposure per strike (vanna_call, vanna_put, net_vanna).",
+  "notes": "",
+  "pages": [
+   "greek-exposure/higher-greeks",
+   "greeks"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 413,
+  "size_bytes": 14050,
+  "response_shape": "{asset:str,expiry_filter:str,strikes:[91 x {strike:float,vanna_call:float,vanna_put:float,net_vanna:float,oi_call:float,oi_put:float}],computed_at:str,spot_price:float}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "expiry",
+    "type": "string",
+    "required": false,
+    "default": "all",
+    "example": "all"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/dex-table",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Delta/dealer exposure table per expiry: call_dex, put_dex, net_dex ...",
+  "notes": "",
+  "pages": [
+   "greeks"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 348,
+  "size_bytes": 1923,
+  "response_shape": "{asset:str,spot:float,rows:[12 x {expiry:str,dte:int,call_dex:float,put_dex:float,net_dex:float,dex_ratio:float,call_oi:float,put_oi:float}],generated_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/expiry-exposure",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Per-expiry call/put GEX, DEX, VEX (nested call/put objects) and net_gex/net_dex/net_vex.",
+  "notes": "",
+  "pages": [
+   "greeks"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 337,
+  "size_bytes": 4126,
+  "response_shape": "{asset:str,spot:float,ts:int,rows:[12 x {expiry_date:str,days_to_expiry:float,call:{...6 keys},put:{...6 keys},net_gex:float,net_dex:float,net_vex:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "default": "deribit",
+    "example": "deribit"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/greek-pnl",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Greek P&L attribution of the current book for a scenario (ds spot shock, dvol vol shock, dt days): components[delta,gamma,vega,theta] and total_pnl.",
+  "notes": "",
+  "pages": [
+   "greeks"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 244,
+  "size_bytes": 521,
+  "response_shape": "{asset:str,ds:float,dvol:float,dt:float,total_pnl:float,components:[4 x {greek:str,value:float,input_move:float,contribution:float}],current_spot:float,option_count:int,computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "ds",
+    "type": "float",
+    "required": false,
+    "desc": "spot shock",
+    "example": 0.0
+   },
+   {
+    "name": "dvol",
+    "type": "float",
+    "required": false,
+    "desc": "vol shock",
+    "example": 0.0
+   },
+   {
+    "name": "dt",
+    "type": "float",
+    "required": false,
+    "desc": "days",
+    "example": 1.0
+   }
+  ]
+ },
+ {
+  "path": "/api/market/pnl-surface",
+  "method": "GET",
+  "group": "greeks/gex",
+  "description": "Option P&L surface (spot x time) for a single option position: entry price, sigma, and points[{...3 keys}].",
+  "notes": "option_type must be the words 'call' or 'put' (NOT 'C'/'P' as other endpoints use); 'C' returns 400.",
+  "pages": [
+   "calculator",
+   "builder/option-pnl"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 265,
+  "size_bytes": 3857,
+  "response_shape": "{asset:str,strike:float,option_type:str,expiry:str,entry_spot:float,entry_price_usd:float,sigma:float,spot_steps:int,time_steps:int,points:[66 x {spot:float,days_remaining:int,pnl:float}],computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "strike",
+    "type": "float",
+    "required": true,
+    "example": 83000
+   },
+   {
+    "name": "option_type",
+    "type": "string",
+    "required": true,
+    "allowed": [
+     "C",
+     "P"
+    ],
+    "example": "C"
+   },
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "contracts",
+    "type": "float",
+    "required": false,
+    "default": 1,
+    "example": 1
+   }
+  ]
+ },
+ {
+  "path": "/api/market/term-structure",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "ATM IV term structure: points[{expiry_date,dte_days,atm_iv,sources_count}] aggregated over selected venues.",
+  "notes": "",
+  "pages": [
+   "term",
+   "dashboard"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 244,
+  "size_bytes": 1256,
+  "response_shape": "{provenance:{sources:[1 x str],points_count:int,per_source:{deribit:{...3 keys}}},points:[12 x {expiry_date:str,dte_days:float,atm_iv:float,sources_count:int}]}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/term-structure/watermarks",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Historical min/p25/p50/p75/max bands of ATM IV by tenor (7,14,30,60,90 d) over lookback_days.",
+  "notes": "",
+  "pages": [
+   "term"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 715,
+  "size_bytes": 654,
+  "response_shape": "{asset:str,lookback_days:int,bands:[5 x {tenor_days:int,min:float,p25:float,p50:float,p75:float,max:float,current:float,iv_rank:float,iv_pct:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "default": 90,
+    "example": 90
+   }
+  ]
+ },
+ {
+  "path": "/api/market/market-summary",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "One-shot KPI summary: spot, ATM IV 7d/30d, term spread, net gamma regime, total OI, P/C ratio, call/put walls, top expiry, RV/VRP, IV percentile, gamma flip.",
+  "notes": "",
+  "pages": [
+   "stats",
+   "dashboard"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 318,
+  "size_bytes": 937,
+  "response_shape": "{scope:{sources:[1 x str],instruments_count:int,expiries_count:int,calls_count:int,puts_count:int},spot:{value:float,delta_24h:null},atm_iv_7d:{value:float,delta_24h:null},atm_iv_30d:{value:float,delta_24h:null},term:{spread_vp:float,tag:str},net_gamma:{value:float,regime:str},total_oi:{value:float,delta_24h:null},pc:{ratio:float,calls_oi:float,puts_oi:float,tag:str},call_wall:{strike:float,oi:float},put_wall:{strike:float,oi:float},top_expiry:{expiry_date:str,oi:float},rv:{value:float,vrp:float,tag:str,tenor_days:int},iv_percentile:{percentile:float,tag:str},gamma_flip:{strike:float,distance_pct:float}}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/atm-vs-rv",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "ATM IV (7/14/30/60 d) vs realised vol time series: points[...] (hourly, ~30 d) for VRP charts.",
+  "notes": "",
+  "pages": [
+   "iv-rv-vrp",
+   "term",
+   "iv-percentile",
+   "dashboard"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 767,
+  "size_bytes": 188435,
+  "response_shape": "{sources:[1 x str],atm_iv_7d:float,atm_iv_14d:float,atm_iv_30d:float,atm_iv_60d:float,points:[721 x {ts_ms:int,rv_park:null,rv_park_14d:null,rv_park_30d:null,rv_park_60d:null,atm_iv:float,atm_iv_14d:float,atm_iv_30d:float,atm_iv_60d:float}],rv_coverage:{7:float,14:float,30:float,60:float},default_tenor_days:int}",
+  "params": [
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "default": 30,
+    "example": 30
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/skew-by-maturity",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "25-delta risk reversal (rr_25d) per expiry per venue.",
+  "notes": "",
+  "pages": [
+   "skew"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 327,
+  "size_bytes": 986,
+  "response_shape": "{sources:[1 x str],items:[12 x {expiry_date:str,dte_days:float,source:str,rr_25d:float}]}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/skew-sparklines",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Per venue, per expiry, a history of rr_25d points over lookback_days. Can be enormous without sources filter (27 MB for all venues).",
+  "notes": "Always pass sources=; the unfiltered call is ~27 MB.",
+  "pages": [
+   "skew"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 2283,
+  "size_bytes": 2596218,
+  "response_shape": "[1 x {source:str,expiries:[10 x {...3 keys}]}]",
+  "params": [
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "default": 7,
+    "example": 7
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/skew/watermarks",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Percentile bands (min/p25/p50/p75/max) of 25d risk reversal per tenor over lookback_days.",
+  "notes": "",
+  "pages": [
+   "skew"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 245,
+  "size_bytes": 1239,
+  "response_shape": "{asset:str,lookback_days:int,bands:[10 x {tenor_days:int,min:float,p25:float,p50:float,p75:float,max:float,current:float,current_pct:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "default": 90,
+    "example": 90
+   }
+  ]
+ },
+ {
+  "path": "/api/market/iv-percentile/search",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Search expiries by ATM-IV percentile rank: rows with iv_atm, iv_percentile, tenor_days, samples. Filter by min_pct/max_pct/lookback_days/source.",
+  "notes": "",
+  "pages": [
+   "iv-percentile"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 525,
+  "size_bytes": 1977,
+  "response_shape": "[10 x {source:str,expiry_date:str,tenor_days:int,iv_atm:float,underlying_price:float,iv_percentile:float,lookback_days:int,samples:int,ts_ms:int}]",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "min_pct",
+    "type": "float",
+    "required": false,
+    "example": 80
+   },
+   {
+    "name": "max_pct",
+    "type": "float",
+    "required": false,
+    "example": 100
+   },
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "example": 90
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/rr-history",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Risk-reversal history at a constant tenor per venue: points[{ts_ms,<venue>:rr}] and current_rr per venue.",
+  "notes": "",
+  "pages": [
+   "skew"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 249,
+  "size_bytes": 7072,
+  "response_shape": "{sources:[1 x str],tenor_days:int,current_rr:{deribit:float},points:[169 x {ts_ms:int,deribit:float}]}",
+  "params": [
+   {
+    "name": "tenor",
+    "type": "int(days)",
+    "required": false,
+    "default": 14,
+    "example": 14
+   },
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "default": 7,
+    "example": 7
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/pc-ratio-history",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Put/call ratio history at a constant tenor per venue: points[{ts_ms,<venue>:pc}] and current_pc.",
+  "notes": "",
+  "pages": [
+   "skew",
+   "open-interest"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 418,
+  "size_bytes": 9098,
+  "response_shape": "{sources:[1 x str],tenor_days:int,current_pc:{deribit:float},points:[169 x {ts_ms:int,deribit:float}]}",
+  "params": [
+   {
+    "name": "tenor",
+    "type": "int(days)",
+    "required": false,
+    "default": 30,
+    "example": 30
+   },
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "default": 7,
+    "example": 7
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/iv-term-history",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Constant-maturity ATM IV history for tenors [1,2,3,4,7,14,30,60,90] days: points[{ts_ms,'1':iv,'2':iv...}].",
+  "notes": "",
+  "pages": [
+   "term"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 622,
+  "size_bytes": 41853,
+  "response_shape": "{source:str,tenors:[9 x int],lookback_days:int,points:[337 x {ts_ms:int,1:float,2:float,3:float,4:float,7:float,14:float,30:float,60:float,90:float}]}",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "default": 14,
+    "example": 14
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/iv-term-history/aggregate",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Same as iv-term-history but per_source array for several venues (sources csv) at once.",
+  "notes": "",
+  "pages": [
+   "term"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 640,
+  "size_bytes": 41892,
+  "response_shape": "{sources:[1 x str],lookback_days:int,per_source:[1 x {source:str,tenors:[9 x int],points:[337 x {...10 keys}]}]}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "example": 14
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/iv-surface-history",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Time-bucketed IV surface snapshots (hours x buckets): k_grid of log-moneyness and snapshots[{ts_ms,underlying_price,rows[{expiry,strike,type,mark_iv,delta,OI}]}]. 1.2 MB.",
+  "notes": "",
+  "pages": [
+   "surfaces",
+   "/ibit/surface"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 2041,
+  "size_bytes": 1241084,
+  "response_shape": "{asset:str,source:str,k_grid:[80 x float],snapshots:[12 x {ts_ms:int,underlying_price:float,expiries:[],rows:[948 x {...6 keys}]}]}",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": true,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "hours",
+    "type": "int",
+    "required": false,
+    "default": 24,
+    "example": 24
+   },
+   {
+    "name": "buckets",
+    "type": "int",
+    "required": false,
+    "default": 12,
+    "example": 12
+   }
+  ]
+ },
+ {
+  "path": "/api/market/iv-smile",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "IV smile (per-strike call/put IV rows) for one venue+expiry.",
+  "notes": "",
+  "pages": [
+   "skew",
+   "expiry",
+   "dashboard",
+   "expiry/:date"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 260,
+  "size_bytes": 1631,
+  "response_shape": "{provenance:{source:str,expiry_date:str,count:int,ts_ms_min:int,ts_ms_max:int},rows:[30 x {strike:float,call_iv:float,put_iv:float}]}",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": true,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/iv-boxplot",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Distribution (p5/p25/median/p75/p95 + current) of ATM IV by tenor bucket.",
+  "notes": "",
+  "pages": [
+   "iv-percentile",
+   "term"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 338,
+  "size_bytes": 990,
+  "response_shape": "[10 x {tenor_days:int,p5:float,p25:float,median:float,p75:float,p95:float,current:float}]",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/iv-crush-scan",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Scan for IV-crush events: events[{expiry_date,source,tenor_days,iv_peak,iv_current,crush_pct,dte}] where crush >= threshold_pct within lookback_days.",
+  "notes": "",
+  "pages": [
+   "iv-percentile"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 427,
+  "size_bytes": 23868,
+  "response_shape": "{asset:str,lookback_days:int,threshold_pct:float,scanned_at:str,events:[129 x {expiry_date:str,source:str,tenor_days:int,iv_peak:float,iv_current:float,crush_pct:float,peak_ts_ms:int,current_ts_ms:int,dte:int}],total_scanned:int}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "default": 7,
+    "example": 7
+   },
+   {
+    "name": "threshold_pct",
+    "type": "float",
+    "required": false,
+    "default": 10,
+    "example": 10
+   }
+  ]
+ },
+ {
+  "path": "/api/market/aggregate/chain",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Cross-venue chain: rows[{strike,by_source:{venue:{call,put}}}] for one expiry.",
+  "notes": "",
+  "pages": [
+   "dashboard",
+   "skew"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 427,
+  "size_bytes": 23971,
+  "response_shape": "{provenance:{expiry_date:str,sources:[1 x str],count:int,per_source:{deribit:{...3 keys}}},rows:[30 x {strike:float,call:{...1 keys},put:{...1 keys}}]}",
+  "params": [
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/aggregate/gex",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Cross-venue GEX per strike: rows[{strike,by_source:{venue:...}}].",
+  "notes": "",
+  "pages": [
+   "dashboard",
+   "expiry"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 254,
+  "size_bytes": 3774,
+  "response_shape": "{provenance:{expiry_date:str,sources:[1 x str],count:int,per_source:{deribit:{...3 keys}}},rows:[30 x {strike:float,by_source:{...1 keys}}]}",
+  "params": [
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/aggregate/iv-smile",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Cross-venue IV smile per strike for one expiry.",
+  "notes": "",
+  "pages": [
+   "skew",
+   "expiry"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 259,
+  "size_bytes": 2451,
+  "response_shape": "{provenance:{expiry_date:str,sources:[1 x str],count:int,per_source:{deribit:{...3 keys}}},rows:[30 x {strike:float,by_source:{...1 keys}}]}",
+  "params": [
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/divergence/iv",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Cross-venue IV divergence per strike: call_spread/put_spread plus which venue is max/min.",
+  "notes": "",
+  "pages": [
+   "divergence"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 631,
+  "size_bytes": 49994,
+  "response_shape": "{provenance:{expiry_date:str,sources:[12 x str],count:int,per_source:{derive:{...3 keys},deribit:{...3 keys},binance:{...3 keys},bybit:{...3 keys},okx:{...3 keys},thalex:{...3 keys},paradex:{...3 keys},aevo:{...3 keys},delta:{...3 keys},bullish:{...3 keys},hypercall:{...3 keys},callput:{...3 keys}}},rows:[68 x {strike:float,call_spread:float,put_spread:float,call_max_source:str,call_min_source:str,put_max_source:str,put_min_source:str,per_source:{...12 keys}}]}",
+  "params": [
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/divergence/basis",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Cross-venue divergence of option basis/price per strike (same shape as divergence/iv).",
+  "notes": "",
+  "pages": [
+   "divergence",
+   "basis"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 867,
+  "size_bytes": 52304,
+  "response_shape": "{provenance:{expiry_date:str,sources:[12 x str],count:int,per_source:{derive:{...3 keys},deribit:{...3 keys},binance:{...3 keys},bybit:{...3 keys},okx:{...3 keys},thalex:{...3 keys},paradex:{...3 keys},aevo:{...3 keys},delta:{...3 keys},bullish:{...3 keys},hypercall:{...3 keys},callput:{...3 keys}}},rows:[68 x {strike:float,call_spread:float,put_spread:float,call_max_source:str,call_min_source:str,put_max_source:str,put_min_source:str,per_source:{...12 keys}}]}",
+  "params": [
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/divergence/freshness",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Data freshness per venue: freshest_source/freshest_ts_ms and per_source staleness.",
+  "notes": "",
+  "pages": [
+   "divergence"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 349,
+  "size_bytes": 1931,
+  "response_shape": "{provenance:{expiry_date:str,sources:[12 x str],count:int,per_source:{derive:{...3 keys},deribit:{...3 keys},binance:{...3 keys},bybit:{...3 keys},okx:{...3 keys},thalex:{...3 keys},paradex:{...3 keys},aevo:{...3 keys},delta:{...3 keys},bullish:{...3 keys},hypercall:{...3 keys},callput:{...3 keys}}},row:{freshest_source:str,freshest_ts_ms:int,per_source:{derive:{...3 keys},deribit:{...3 keys},binance:{...3 keys},bybit:{...3 keys},okx:{...3 keys},thalex:{...3 keys},paradex:{...3 keys},aevo:{...3 keys},delta:{...3 keys},bullish:{...3 keys},hypercall:{...3 keys},callput:{...3 keys}}}}",
+  "params": [
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/divergence/gamma",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Cross-venue gamma divergence per strike (call_spread_pct/put_spread_pct).",
+  "notes": "",
+  "pages": [
+   "divergence"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 616,
+  "size_bytes": 55540,
+  "response_shape": "{provenance:{expiry_date:str,sources:[12 x str],count:int,per_source:{derive:{...3 keys},deribit:{...3 keys},binance:{...3 keys},bybit:{...3 keys},okx:{...3 keys},thalex:{...3 keys},paradex:{...3 keys},aevo:{...3 keys},delta:{...3 keys},bullish:{...3 keys},hypercall:{...3 keys},callput:{...3 keys}}},rows:[68 x {strike:float,call_spread_pct:float,put_spread_pct:float,call_max_source:null,call_min_source:null,put_max_source:null,put_min_source:null,per_source:{...12 keys}}]}",
+  "params": [
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/divergence/arb",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Top IV-arbitrage candidates between venues: buy_source, sell_source, iv_spread_vp, fee_cost_vp, net_edge_vp, expiry_date.",
+  "notes": "",
+  "pages": [
+   "arb-guide",
+   "divergence"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 358,
+  "size_bytes": 1115,
+  "response_shape": "[5 x {expiry_date:str,buy_source:str,sell_source:str,iv_spread_vp:float,fee_cost_vp:float,net_edge_vp:float,ts_ms:int,recv_ts_ms:int}]",
+  "params": [
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 50,
+    "example": 5
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/straddle-range",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "ATM straddle for the nearest (or given) expiry: premium, % of spot, breakevens (be_low/be_high). Note expiry string is Deribit-style (11OCT26).",
+  "notes": "",
+  "pages": [
+   "builder/straddle",
+   "dashboard"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 404,
+  "size_bytes": 197,
+  "response_shape": "{spot:float,expiry:str,dte:int,atm_strike:float,call_iv:float,put_iv:float,straddle_premium:float,straddle_pct:float,be_low:float,be_high:float,source:str}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "expiry",
+    "type": "string",
+    "required": false,
+    "desc": "optional; response expiry uses Deribit style e.g. 11OCT26"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/tail-strike",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Tail-risk score from far-OTM skew: tail_strike_score, put/call IV at 10d/25d delta, signal, flash_crash_risk, confidence.",
+  "notes": "",
+  "pages": [
+   "tail-strike"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 449,
+  "size_bytes": 355,
+  "response_shape": "{asset:str,source:str,spot:float,tail_strike_score:float,put_iv_10d:float,put_iv_25d:float,call_iv_10d:float,call_iv_25d:float,atm_iv:null,put_skew_raw:float,call_skew_raw:float,signal:str,flash_crash_risk:str,confidence:str,data_points:int,computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/tail-strike-history",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "History (ms timestamps) of the tail strike score and skew components; window_days param.",
+  "notes": "",
+  "pages": [
+   "tail-strike"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 761,
+  "size_bytes": 131673,
+  "response_shape": "{asset:str,source:str,data:[696 x {ts_ms:int,tail_strike_score:float,put_skew_raw:float,skew_25d:float,rr_25d:float,atm_iv:float,spot:float,signal:str,confidence:str}],signal_distribution:{HIGH_PUT_TAIL:int,ELEVATED_PUT_TAIL:int,NORMAL:int,ELEVATED_CALL_TAIL:int,HIGH_CALL_TAIL:int},current_score:float,data_points:int,window_days:int,computed_at:str,reason:null}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "window_days",
+    "type": "int",
+    "required": false,
+    "example": 30
+   }
+  ]
+ },
+ {
+  "path": "/api/market/vol-cone",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Realised-vol cone: per window (7/14/30/60/90 d) hv_current, hv percentiles, iv_atm, iv_premium, iv_pct_rank.",
+  "notes": "",
+  "pages": [
+   "iv-rv-vrp"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 315,
+  "size_bytes": 1011,
+  "response_shape": "{asset:str,spot:float,cones:[5 x {window_days:int,hv_current:float,hv_10pct:float,hv_25pct:float,hv_75pct:float,hv_90pct:float,iv_atm:float,iv_premium:float,iv_pct_rank:float}],windows:[5 x int],generated_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/weekly-variance",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Weekly realised variance/vol and return for the last N weeks (implied_var/vrp may be null).",
+  "notes": "",
+  "pages": [
+   "iv-rv-vrp"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 283,
+  "size_bytes": 2166,
+  "response_shape": "{asset:str,data:[12 x {week_start:str,week_end:str,realized_var:float,implied_var:null,vrp:null,realized_vol:float,implied_vol:null,return_pct:float}],generated_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "weeks",
+    "type": "int",
+    "required": false,
+    "default": 12,
+    "example": 12
+   }
+  ]
+ },
+ {
+  "path": "/api/market/prob-cone",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Probability cone from ATM IV: horizons[{tenor_days,iv_atm,lower/upper 1sigma/2sigma price}].",
+  "notes": "",
+  "pages": [
+   "quant",
+   "term"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 251,
+  "size_bytes": 1130,
+  "response_shape": "{asset:str,source:str,spot:float,horizons:[5 x {tenor_days:int,iv_atm:float,lower_2sigma:float,lower_1sigma:float,expected:float,upper_1sigma:float,upper_2sigma:float,prob_in_1sigma:float,prob_in_2sigma:float}],computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/implied-prob",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Risk-neutral implied probabilities per strike for one expiry (prob_call_itm, prob_put_itm ...).",
+  "notes": "",
+  "pages": [
+   "greeks"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 262,
+  "size_bytes": 6186,
+  "response_shape": "{asset:str,expiry:str,spot_price:float,strikes:[30 x {strike:float,prob_call_itm:float,prob_put_itm:float,break_even_call:float,break_even_put:float,call_premium_usd:float,put_premium_usd:float,call_oi:float,put_oi:float}],computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/ivr-gamma-flip",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "IV rank (30 d) + current IV + gamma flip level in one tiny payload.",
+  "notes": "",
+  "pages": [
+   "stats"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 348,
+  "size_bytes": 280,
+  "response_shape": "{asset:str,iv_rank:float,iv_current:float,iv_30d_min:float,iv_30d_max:float,gamma_flip_level:float,current_spot:float,gamma_above_flip:float,gamma_below_flip:float,iv_regime:str,computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/vol-lifecycle",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Vol regime/lifecycle phase classifier (e.g. CONSOLIDATION): phase, confidence, ivp, iv_atm, velocities, skew, term slope, data_quality.",
+  "notes": "",
+  "pages": [
+   "stats"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 304,
+  "size_bytes": 507,
+  "response_shape": "{asset:str,source:str,phase:str,confidence:float,ivp:float,iv_atm:float,iv_velocity_24h:float,skew_rr_25d:float,skew_velocity_24h:float,term_slope_pct:float,tenor_days:int,wing_tail_rank_pct:float,conditions_met:[],runner_up_phase:null,runner_up_confidence:null,data_quality:str,ts_ms:int,ts:null,description:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/svi-surface",
+  "method": "GET",
+  "group": "quant",
+  "description": "SVI fit for one expiry: svi_a/b/rho/m/sigma, fit_error and points[{log_moneyness,strike,market_iv,svi_iv}].",
+  "notes": "",
+  "pages": [
+   "quant"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 437,
+  "size_bytes": 4224,
+  "response_shape": "{asset:str,expiry:str,spot:float,tenor_days:int,svi_a:float,svi_b:float,svi_rho:float,svi_m:float,svi_sigma:float,fit_error:float,points:[50 x {log_moneyness:float,strike:float,market_iv:float,svi_iv:float}],computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/svi-full-surface",
+  "method": "GET",
+  "group": "quant",
+  "description": "SVI-fitted IV rows on a common log-moneyness grid for all expiries of a venue (iv_row[80] per expiry).",
+  "notes": "",
+  "pages": [
+   "surfaces",
+   "quant"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1178,
+  "size_bytes": 8268,
+  "response_shape": "{source:str,asset:str,expiries:[11 x {expiry_date:str,dte_days:int,t_years:float,iv_row:[80 x float],fit_ok:bool,instrument_count:int,underlying_price:float}],k_grid:[80 x float],underlying_price:float,generated_at_ms:int}",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": true,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/merton-jump",
+  "method": "GET",
+  "group": "quant",
+  "description": "Merton jump-diffusion model option prices vs strike_pct for given lambda_/mu_j/sigma_j (model playground, synthetic).",
+  "notes": "",
+  "pages": [
+   "quant"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 248,
+  "size_bytes": 2025,
+  "response_shape": "{asset:str,spot:float,sigma:float,lambda_:float,mu_j:float,sigma_j:float,points:[21 x {strike_pct:float,strike:float,tenor_days:int,market_iv:null,merton_iv:float}],computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "lambda_",
+    "type": "float",
+    "required": false,
+    "default": 3,
+    "example": 3
+   },
+   {
+    "name": "mu_j",
+    "type": "float",
+    "required": false,
+    "default": -0.05,
+    "example": -0.05
+   },
+   {
+    "name": "sigma_j",
+    "type": "float",
+    "required": false,
+    "default": 0.08,
+    "example": 0.08
+   }
+  ]
+ },
+ {
+  "path": "/api/market/rough-vol",
+  "method": "GET",
+  "group": "quant",
+  "description": "Rough-volatility diagnostics: Hurst exponent, interpretation, sigma_0, per-tenor values.",
+  "notes": "",
+  "pages": [
+   "quant"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 246,
+  "size_bytes": 377,
+  "response_shape": "{asset:str,hurst_exponent:float,hurst_interpretation:str,sigma_0:float,log_returns_count:int,tenors:[3 x {tenor_days:int,market_iv:float,rough_vol_prediction:float}],computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/heston-surface",
+  "method": "GET",
+  "group": "quant",
+  "description": "Heston model prices/IVs vs strike_pct for given v0/theta/kappa/xi/rho (model playground; spot is a fixed 100000 reference).",
+  "notes": "",
+  "pages": [
+   "quant"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 243,
+  "size_bytes": 2040,
+  "response_shape": "{asset:str,spot:float,v0:float,theta:float,kappa:float,xi:float,rho:float,points:[21 x {strike_pct:float,strike:float,tenor_days:int,heston_iv:float,market_iv:null}],computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "v0",
+    "type": "float",
+    "required": false,
+    "default": 0.15,
+    "example": 0.15
+   },
+   {
+    "name": "theta",
+    "type": "float",
+    "required": false,
+    "default": 0.15,
+    "example": 0.15
+   },
+   {
+    "name": "kappa",
+    "type": "float",
+    "required": false,
+    "default": 2,
+    "example": 2
+   },
+   {
+    "name": "xi",
+    "type": "float",
+    "required": false,
+    "default": 0.5,
+    "example": 0.5
+   },
+   {
+    "name": "rho",
+    "type": "float",
+    "required": false,
+    "default": -0.7,
+    "example": -0.7
+   }
+  ]
+ },
+ {
+  "path": "/api/market/dvol-index",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Deribit DVOL-style volatility index: current, 24h change, regime and 7 d history (hourly).",
+  "notes": "",
+  "pages": [
+   "vol-index",
+   "ibit/cross"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 339,
+  "size_bytes": 6558,
+  "response_shape": "{asset:str,source:str,current:float,change_24h:float,change_pct_24h:float,regime:str,history_7d:[169 x {ts_ms:int,value:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "days",
+    "type": "int",
+    "required": false,
+    "desc": "seen in ibit/cross page",
+    "example": 30
+   }
+  ]
+ },
+ {
+  "path": "/api/market/mbvi-index",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "MBVI (multi-venue blended vol index): current, 24h change, near/next expiry, per-venue values.",
+  "notes": "",
+  "pages": [
+   "vol-index"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 294,
+  "size_bytes": 7840,
+  "response_shape": "{asset:str,current:float,change_24h:float,change_pct_24h:float,near_expiry:str,next_expiry:str,near_dte:float,next_dte:float,sources_used:[10 x str],n_strikes:int,per_source:{okx:{mbvi:float,mbvi_raw:float,n_strikes:int,oi_total:float},aevo:{mbvi:float,mbvi_raw:float,n_strikes:int,oi_total:float},bybit:{mbvi:float,mbvi_raw:float,n_strikes:int,oi_total:float},delta:{mbvi:float,mbvi_raw:float,n_strikes:int,oi_total:float},derive:{mbvi:float,mbvi_raw:float,n_strikes:int,oi_total:float},thalex:{mbvi:float,mbvi_raw:float,n_strikes:int,oi_total:float},binance:{mbvi:float,mbvi_raw:float,n_strikes:int,oi_total:float},bullish:{mbvi:float,mbvi_raw:float,n_strikes:int,oi_total:float},deribit:{mbvi:float,mbvi_raw:float,n_strikes:int,oi_total:float},paradex:{mbvi:float,mbvi_raw:float,n_strikes:int,oi_total:float}},history_7d:[168 x {ts_ms:int,value:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/mbvi-candles",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "OHLC candles of the MBVI index (resolution 1m..1M) with optional from_ms/to_ms.",
+  "notes": "Unknown source returns 200 with candles:[] (slow, 12.8 s); only the listed venues have data.",
+  "pages": [
+   "vol-index"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 282,
+  "size_bytes": 9548,
+  "response_shape": "{asset:str,resolution:str,candles:[96 x {ts_ms:int,open:float,high:float,low:float,close:float,n_points:int}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "resolution",
+    "type": "string",
+    "required": false,
+    "default": "1D",
+    "allowed": [
+     "1m",
+     "3m",
+     "5m",
+     "15m",
+     "30m",
+     "1H",
+     "2H",
+     "4H",
+     "1D",
+     "1W",
+     "1M"
+    ],
+    "example": "1D"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "default": "combined",
+    "allowed": [
+     "combined",
+     "computed",
+     "deribit",
+     "derive",
+     "bybit",
+     "binance",
+     "thalex",
+     "okx"
+    ],
+    "example": "combined"
+   },
+   {
+    "name": "from_ms",
+    "type": "int(ms)",
+    "required": false
+   },
+   {
+    "name": "to_ms",
+    "type": "int(ms)",
+    "required": false
+   }
+  ]
+ },
+ {
+  "path": "/api/market/spot",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Latest spot/index price per venue: [{source,price,ts_ms,recv_ts_ms,age_ms}]. REST twin of the /api/ws/spot snapshot.",
+  "notes": "",
+  "pages": [
+   "arb-guide"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 289,
+  "size_bytes": 1115,
+  "response_shape": "[11 x {source:str,price:float,ts_ms:int,recv_ts_ms:int,age_ms:int}]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/spot-history",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Venue spot price series at interval_minutes over window_minutes: points[{ts_ms,prices:{venue:price}}].",
+  "notes": "",
+  "pages": [
+   "spot",
+   "basis",
+   "calculator",
+   "payoff"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 319,
+  "size_bytes": 777,
+  "response_shape": "{sources:[1 x str],window_minutes:int,interval_minutes:int,points:[13 x {ts_ms:int,prices:{...1 keys}}]}",
+  "params": [
+   {
+    "name": "window_minutes",
+    "type": "int",
+    "required": false,
+    "default": 60,
+    "example": 60
+   },
+   {
+    "name": "interval_minutes",
+    "type": "int",
+    "required": false,
+    "default": 1,
+    "example": 5
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/spot-candles",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Spot OHLCV candles from an exchange feed (default bybit): candles[{ts_ms,open,high,low,close,volume,...}]. full=1 returns max history.",
+  "notes": "Valid tf: 1m,3m,5m,15m,30m,1H,2H,4H,6H,12H,1D,1W,1M (case-sensitive, 'm' minutes vs 'M' month). Unknown source silently falls back (200).",
+  "pages": [
+   "spot",
+   "gex-profile",
+   "block-rfq/*"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 440,
+  "size_bytes": 11853,
+  "response_shape": "{asset:str,tf:str,source:str,candles:[100 x {ts_ms:int,open:float,high:float,low:float,close:float,volume:float,n_points:int}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "tf",
+    "type": "string",
+    "required": false,
+    "default": "1D",
+    "allowed": [
+     "1m",
+     "3m",
+     "5m",
+     "15m",
+     "30m",
+     "1H",
+     "2H",
+     "4H",
+     "6H",
+     "12H",
+     "1D",
+     "1W",
+     "1M"
+    ],
+    "example": "1D"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "default": "bybit",
+    "allowed": [
+     "bybit",
+     "binance",
+     "coinbase",
+     "kraken (SPA uses bybit; unknown values silently accepted)"
+    ],
+    "example": "bybit"
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 730,
+    "example": 100
+   },
+   {
+    "name": "full",
+    "type": "string",
+    "required": false,
+    "desc": "'1' = full history"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/time-at-price-kline",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Time-at-price (market profile) heatmap: cells[{ti,pi,count}] over time bins x price bins, plus spot_path.",
+  "notes": "tf valid values same as spot-candles.",
+  "pages": [
+   "spot"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 525,
+  "size_bytes": 9772,
+  "response_shape": "{asset:str,source:str,ts_min_ms:int,ts_max_ms:int,price_min:float,price_max:float,price_step:float,time_step_ms:int,time_bin_count:int,price_bin_count:int,cells:[276 x {ti:int,pi:int,count:int}],spot_path:[48 x {ts_ms:int,price:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "tf",
+    "type": "string",
+    "required": false,
+    "default": "1H",
+    "allowed": [
+     "1m",
+     "3m",
+     "5m",
+     "15m",
+     "30m",
+     "1H",
+     "2H",
+     "4H",
+     "6H",
+     "12H",
+     "1D",
+     "1W",
+     "1M"
+    ],
+    "example": "1H"
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 168,
+    "example": 48
+   },
+   {
+    "name": "price_bins",
+    "type": "int",
+    "required": false,
+    "default": 80,
+    "example": 40
+   }
+  ]
+ },
+ {
+  "path": "/api/market/lead-lag",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Latest cross-venue lead/lag correlations: [{source_a,source_b,lag_seconds,correlation,samples}].",
+  "notes": "",
+  "pages": [
+   "lead-lag"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 264,
+  "size_bytes": 10012,
+  "response_shape": "[50 x {source_a:str,source_b:str,lag_seconds:int,correlation:float,samples:int,window_seconds:int,ts_ms:int,ts_ms_min:int,ts_ms_max:int}]",
+  "params": [
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "example": 50
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/lead-lag/config",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Parameters of the lead-lag job: lags [1,5,15] s, window_seconds, interval_seconds, min_samples.",
+  "notes": "",
+  "pages": [
+   "lead-lag"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 330,
+  "size_bytes": 77,
+  "response_shape": "{lags:[3 x int],window_seconds:int,interval_seconds:int,min_samples:int}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/lead-lag/history",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Historical lead-lag correlation rows for a venue pair/lag.",
+  "notes": "",
+  "pages": [
+   "lead-lag"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 285,
+  "size_bytes": 7587,
+  "response_shape": "[60 x {ts_ms:int,source_a:str,source_b:str,lag_seconds:int,correlation:float,samples:int}]",
+  "params": [
+   {
+    "name": "source_a",
+    "type": "string",
+    "required": false,
+    "example": "deribit"
+   },
+   {
+    "name": "source_b",
+    "type": "string",
+    "required": false,
+    "example": "bybit"
+   },
+   {
+    "name": "lag_seconds",
+    "type": "int",
+    "required": false,
+    "example": 1
+   },
+   {
+    "name": "hours",
+    "type": "int",
+    "required": false,
+    "default": 1,
+    "example": 1
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 1000,
+    "example": 100
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/dashboard-init",
+  "method": "GET",
+  "group": "meta",
+  "description": "Bootstrap payload for the dashboard: sources list, spot (empty at test), per-venue expiries, front_month summary. Not referenced by name in the bundle (only in the cache-policy list) but live.",
+  "notes": "Undocumented in the bundle (name only appears in a TTL rule).",
+  "pages": [
+   "dashboard (bootstrap; not referenced in bundle, only in cache-policy list)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 244,
+  "size_bytes": 1987,
+  "response_shape": "{sources:[12 x str],spot:[],expiries:{derive:[12 x str],deribit:[12 x str],binance:[11 x str],bybit:[12 x str],okx:[13 x str],thalex:[9 x str],paradex:[13 x str],aevo:[12 x str],delta:[8 x str],bullish:[17 x str],coincall:[],hypercall:[],callput:[],thetadata:[]},front_month:{expiry_date:str,dte_days:float,atm_iv:float,total_oi:float}}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/orderbook",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "L2 order-book ladder for one option contract. SPA pins source=bullish (only venue with captured depth). All calls tested returned 404 'no order book for ...' (empty pipeline at test time).",
+  "notes": "404 {'detail':\"no order book for '<instrument>'\"} for every deribit/derive/paradex/bullish instrument tried: unusable at test time.",
+  "pages": [
+   "dashboard"
+  ],
+  "auth_required": false,
+  "status": 404,
+  "latency_ms": 395,
+  "size_bytes": 58,
+  "response_shape": "{detail:str}",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "instrument",
+    "type": "string",
+    "required": true,
+    "example": "BTC-11OCT26-83000-C"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "depth",
+    "type": "int",
+    "required": false,
+    "example": 10
+   }
+  ]
+ },
+ {
+  "path": "/api/market/orderbook/instruments",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Instrument list available for the order-book page. Ignores the source param: always returned the Bullish list (BTC-USDC-YYYYMMDD-STRIKE-C/P, ~1,400 rows).",
+  "notes": "source param ignored; list is Bullish USDC-quoted names.",
+  "pages": [
+   "dashboard"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 792,
+  "size_bytes": 93299,
+  "response_shape": "[938 x {instrument:str,expiry_date:str,strike:float,option_type:str}]",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/trades/aggregate",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Recent option trades across venues: provenance + rows[{source,instrument,strike,option_type,ts_ms,price(coin),amount,direction,iv,underlying_price}]. spread=true groups multi-leg prints.",
+  "notes": "",
+  "pages": [
+   "tape",
+   "dashboard",
+   "order-flow"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 433,
+  "size_bytes": 17810,
+  "response_shape": "{provenance:{sources:[1 x str],count:int,since_ms:int,per_source:{deribit:{...3 keys}},archive:null},rows:[64 x {source:str,instrument:str,expiry_date:str,strike:float,option_type:str,ts_ms:int,recv_ts_ms:int,trade_id:str,price:float,amount:float,direction:str,iv:float,underlying_price:float}]}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "since_ms",
+    "type": "int(ms)",
+    "required": false,
+    "example": "1791626125417"
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "example": 100
+   },
+   {
+    "name": "spread",
+    "type": "bool",
+    "required": false,
+    "desc": "'true' => group multi-leg spreads"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/flow-map-bins",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Trade-flow bubble-map data: bins[{t_bucket_ms,price_bucket,option_type,direction,count,total_notional}] + sparse_trades. Up to 4 MB on wide windows.",
+  "notes": "",
+  "pages": [
+   "order-flow",
+   "tape"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1343,
+  "size_bytes": 336399,
+  "response_shape": "{bins:[552 x {t_bucket_ms:int,price_bucket:float,option_type:str,direction:str,count:int,total_notional:float,total_amount:float,avg_price:float}],sparse_trades:[850 x {source:str,instrument:str,expiry_date:str,strike:float,option_type:str,ts_ms:int,recv_ts_ms:int,trade_id:str,price:float,amount:float,direction:str,iv:float,underlying_price:float}],bucket_ms:int,price_bucket_width:float,sparse_threshold:int,since_ms:int,sources:[1 x str],available_expiries:[13 x str]}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "since_ms",
+    "type": "int(ms epoch)",
+    "required": false,
+    "desc": "window start",
+    "example": "1791543325417"
+   },
+   {
+    "name": "bucket_ms",
+    "type": "int",
+    "required": false,
+    "example": 3600000
+   },
+   {
+    "name": "price_bucket_width",
+    "type": "float",
+    "required": false
+   },
+   {
+    "name": "sparse_threshold",
+    "type": "int",
+    "required": false
+   },
+   {
+    "name": "expiries",
+    "type": "csv",
+    "required": false
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/flow-summary",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Aggregated option flow since since_ms by expiry/type/direction: count, total_amount, total_premium, total_notional.",
+  "notes": "",
+  "pages": [
+   "dashboard",
+   "volume-flow"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 265,
+  "size_bytes": 9129,
+  "response_shape": "{rows:[52 x {expiry_date:str,option_type:str,direction:str,count:int,total_amount:float,total_premium:float,total_notional:float}],since_ms:int,sources:[1 x str]}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "since_ms",
+    "type": "int(ms epoch)",
+    "required": false,
+    "desc": "window start",
+    "example": "1791543325417"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/volume-by-strike",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Traded volume cells by expiry x strike since since_ms.",
+  "notes": "",
+  "pages": [
+   "volume-flow",
+   "open-interest"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 597,
+  "size_bytes": 32068,
+  "response_shape": "{sources:[1 x str],since_ms:int,cells:[366 x {expiry_date:str,strike:float,total_amount:float,trade_count:int}]}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "since_ms",
+    "type": "int(ms epoch)",
+    "required": false,
+    "desc": "window start",
+    "example": "1791543325417"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/fresh-positioning-by-strike",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Per-strike 24h volume vs open interest (fresh positioning ratio).",
+  "notes": "",
+  "pages": [
+   "volume-flow"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 601,
+  "size_bytes": 9106,
+  "response_shape": "{sources:[1 x str],since_ms:int,rows:[92 x {strike:float,volume_24h:float,open_interest:float,ratio:float}]}",
+  "params": [
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   },
+   {
+    "name": "since_ms",
+    "type": "int(ms epoch)",
+    "required": false,
+    "desc": "window start",
+    "example": "1791543325417"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/flow-agg",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Aggregated flow for a trailing window_h: summary (call/put premium, net flow, buys vs sells) + top_trades + breakdowns. 230 KB-500 KB.",
+  "notes": "",
+  "pages": [
+   "order-flow",
+   "stats",
+   "/ibit/flow"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1512,
+  "size_bytes": 230861,
+  "response_shape": "{asset:str,window_h:int,summary:{call_premium_usd:float,put_premium_usd:float,net_flow_usd:float,call_put_ratio:float,total_trades:int,call_trades:int,put_trades:int,flow_ratio:float,call_buys_premium:float,call_sells_premium:float,put_buys_premium:float,put_sells_premium:float},top_trades:[20 x {ts_ms:int,instrument:str,option_type:str,direction:str,amount:float,premium_usd:float,iv:float,strike:float,expiry_date:str,source:str}],flow_by_expiry:[13 x {expiry_date:str,call_premium_usd:float,put_premium_usd:float,net_flow_usd:float,call_trades:int,put_trades:int,call_buys_premium:float,call_sells_premium:float,put_buys_premium:float,put_sells_premium:float,by_strike:[22 x {...5 keys}]}],flow_by_strike:[92 x {strike:float,call_buys_premium:float,call_sells_premium:float,put_buys_premium:float,put_sells_premium:float,by_expiry:[13 x {...5 keys}]}],moneyness:[5 x {bucket:str,call_buys_premium:float,call_sells_premium:float,put_buys_premium:float,put_sells_premium:float}],generated_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "window_h",
+    "type": "int",
+    "required": false,
+    "default": 24,
+    "example": 24
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/premium-flow-matrix",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Premium flow matrix cells by venue x strike x expiry x type with buy/sell premium USD.",
+  "notes": "",
+  "pages": [
+   "premium"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 841,
+  "size_bytes": 76922,
+  "response_shape": "{asset:str,window_h:int,cells:[433 x {source:str,strike:float,expiry_date:str,option_type:str,buy_premium_usd:float,sell_premium_usd:float,buy_trades:int,sell_trades:int}],generated_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "window_h",
+    "type": "int",
+    "required": false,
+    "default": 24,
+    "example": 24
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/zdte-distribution",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "0-3 DTE OI/volume/IV distribution by strike (by_dte summary + strikes[]).",
+  "notes": "",
+  "pages": [
+   "open-interest"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 427,
+  "size_bytes": 16322,
+  "response_shape": "{asset:str,spot:float,dte_max:int,sources:[1 x str],by_dte:[3 x {dte:int,expiry_date:str,total_call_oi:float,total_put_oi:float,total_volume:float,avg_call_iv:float,avg_put_iv:float,strike_count:int}],strikes:[87 x {strike:float,dte:int,expiry_date:str,call_oi:float,put_oi:float,call_volume:float,put_volume:float,call_iv:float,put_iv:float,total_oi:float,pcr:null}],computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "dte_max",
+    "type": "int",
+    "required": false,
+    "default": 3,
+    "example": 3
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   }
+  ]
+ },
+ {
+  "path": "/api/volume-flow/net-premium",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Net premium by option_type x direction over window_h, scope screen|block|both; includes net_call/put/total premium USD.",
+  "notes": "",
+  "pages": [
+   "volume-flow"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1204,
+  "size_bytes": 698,
+  "response_shape": "{asset:str,scope:str,window_h:int,since_ms:int,rows:[4 x {option_type:str,direction:str,count:int,total_amount:float,total_premium_usd:float}],net_call_premium_usd:float,net_put_premium_usd:float,net_total_premium_usd:float}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "scope",
+    "type": "string",
+    "required": false,
+    "default": "both",
+    "allowed": [
+     "screen",
+     "block",
+     "both"
+    ],
+    "example": "both"
+   },
+   {
+    "name": "window_h",
+    "type": "int",
+    "required": false,
+    "default": 24,
+    "example": 24
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "default": "all venues for asset",
+    "desc": "comma-separated venue list; omitted = all",
+    "example": "deribit"
+   }
+  ]
+ },
+ {
+  "path": "/api/wings",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "Wing richness: IV, strike, OI(USD) and rank_pct at 10d/35d put and call wings for one venue+expiry.",
+  "notes": "expiry must match ^\\d{4}-\\d{2}-\\d{2}$ (422 otherwise).",
+  "pages": [
+   "skew"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 280,
+  "size_bytes": 502,
+  "response_shape": "{source:str,expiry_date:str,ts_ms:int,spot:float,dte_days:float,wings:{10d_put:{iv:float,strike:float,oi_usd:float,rank_pct:float},35d_put:{iv:float,strike:float,oi_usd:float,rank_pct:float},10d_call:{iv:float,strike:float,oi_usd:float,rank_pct:float},35d_call:{iv:float,strike:float,oi_usd:float,rank_pct:float}}}",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/wings/expiries",
+  "method": "GET",
+  "group": "market/vol",
+  "description": "List of expiry dates (YYYY-MM-DD) that have wing data for the venue.",
+  "notes": "",
+  "pages": [
+   "skew"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 303,
+  "size_bytes": 170,
+  "response_shape": "[13 x str]",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/scanner/movers",
+  "method": "GET",
+  "group": "scanner/strategy",
+  "description": "Top option contracts by % price change over tf (5m..1d): [{instrument,source,pct_change,closes[]}].",
+  "notes": "tf pattern ^(5m|15m|30m|1h|4h|1d)$.",
+  "pages": [
+   "scanner"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 661,
+  "size_bytes": 1730,
+  "response_shape": "[10 x {instrument:str,source:str,pct_change:float,closes:[8 x float]}]",
+  "params": [
+   {
+    "name": "tf",
+    "type": "string",
+    "required": false,
+    "default": "5m",
+    "allowed": [
+     "5m",
+     "15m",
+     "30m",
+     "1h",
+     "4h",
+     "1d"
+    ],
+    "example": "5m"
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 10,
+    "example": 10
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/scanner/expiries",
+  "method": "GET",
+  "group": "scanner/strategy",
+  "description": "Expiry list for the scanner with strike_count, total_oi, last_ts.",
+  "notes": "",
+  "pages": [
+   "scanner"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 252,
+  "size_bytes": 1321,
+  "response_shape": "[12 x {expiry_date:str,dte_days:int,strike_count:int,total_oi:float,last_ts:int}]",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/scanner/chart",
+  "method": "GET",
+  "group": "scanner/strategy",
+  "description": "OHLC (+USD OHLC, IV, OI averages) bars for one option instrument; limit must be >= 10.",
+  "notes": "limit >= 10 enforced (422). tf pattern ^(5m|15m|30m|1h|4h|1d)$.",
+  "pages": [
+   "scanner",
+   "dashboard",
+   "strike-insight"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 703,
+  "size_bytes": 32504,
+  "response_shape": "[100 x {ts:int,o:float,h:float,l:float,c:float,o_usd:float,h_usd:float,l_usd:float,c_usd:float,underlying:null,iv_avg:float,oi_avg:float,iv_open:null,iv_high:null,iv_low:null,iv_close:null,oi_open:null,oi_high:null,oi_low:null,oi_close:null}]",
+  "params": [
+   {
+    "name": "instrument",
+    "type": "string",
+    "required": true,
+    "example": "BTC-11OCT26-83000-C"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "tf",
+    "type": "string",
+    "required": false,
+    "default": "5m",
+    "allowed": [
+     "5m",
+     "15m",
+     "30m",
+     "1h",
+     "4h",
+     "1d"
+    ],
+    "example": "5m"
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 500,
+    "example": 100
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/strategy/picks",
+  "method": "GET",
+  "group": "scanner/strategy",
+  "description": "Ranked multi-leg strategy ideas for a bias on one expiry (butterflies, spreads ...) with legs, net_cost, max_loss/gain, POP, EV, greeks, plus risk-neutral density.",
+  "notes": "",
+  "pages": [
+   "strategy"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 560,
+  "size_bytes": 17020,
+  "response_shape": "{strategies:[5 x {name:str,legs:[3 x {...5 keys}],net_cost:float,max_loss:float,max_gain:float,risk_reward:float,pop:float,ev:float,alpha_score:float,composite_score:float,breakeven:[2 x float],greeks:{...4 keys},source:str,expiry:str,dte:float,rnd_used:bool}],rnd:{strikes:[400 x float],probabilities:[400 x float],available:bool,spot:float,expiry:str,T:float},spot:float,source:str,expiry:str,bias:str}",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": true,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "bias",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "bearish",
+     "bullish",
+     "long_vol",
+     "neutral",
+     "short_vol"
+    ],
+    "example": "bullish"
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 5,
+    "example": 5
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/strategy/scan",
+  "method": "GET",
+  "group": "scanner/strategy",
+  "description": "Cross-expiry strategy scan for a bias/target_pct/max_dte: results[], sources_checked, expiries_scanned.",
+  "notes": "",
+  "pages": [
+   "strategy/scan"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 403,
+  "size_bytes": 11046,
+  "response_shape": "{results:[23 x {name:str,legs:[1 x {...5 keys}],net_cost:float,max_loss:float,max_gain:float,risk_reward:float,pop:float,ev:float,alpha_score:float,composite_score:float,breakeven:[1 x float],greeks:{...4 keys},source:str,expiry:str,dte:float,rnd_used:bool}],sources_checked:int,expiries_scanned:[6 x {expiry:str,dte:float,n_strategies:int}],spot:float}",
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": true,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "bias",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "bearish",
+     "bullish",
+     "long_vol",
+     "neutral",
+     "short_vol"
+    ],
+    "example": "bullish"
+   },
+   {
+    "name": "target_pct",
+    "type": "float",
+    "required": false,
+    "example": 5
+   },
+   {
+    "name": "max_dte",
+    "type": "int",
+    "required": false,
+    "example": 14
+   },
+   {
+    "name": "cross_expiry",
+    "type": "bool",
+    "required": false,
+    "default": false,
+    "example": "false"
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/strike-insight",
+  "method": "GET",
+  "group": "scanner/strategy",
+  "description": "Per-strike call/put insight: greeks, tape flow (buy/sell volume & premium), turnover ratio, RFQ strategies touching the strike. window is not validated server-side (SPA uses 24h|7d|30d|90d).",
+  "notes": "window not validated (invalid value still 200 and echoed).",
+  "pages": [
+   "strike-insight",
+   "strike"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 266,
+  "size_bytes": 774,
+  "response_shape": "{asset:str,expiry:str,strike:float,source:str,window:str,call:{greeks:{delta:float,gamma:float,theta:float,vega:float,mark_price:float,open_interest:float,iv:float},tape_flow:{buy_volume:float,sell_volume:float,buy_premium_usd:float,sell_premium_usd:float},turnover_ratio:float},put:{greeks:{delta:float,gamma:float,theta:float,vega:float,mark_price:float,open_interest:float,iv:float},tape_flow:{buy_volume:float,sell_volume:float,buy_premium_usd:float,sell_premium_usd:float},turnover_ratio:float},rfq_strategies:[1 x {strategy:str,count:int,notional_usd:float}],rfq_premium_usd:float,computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "strike",
+    "type": "float",
+    "required": true,
+    "example": 83000
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "window",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "24h",
+     "7d",
+     "30d",
+     "90d"
+    ],
+    "example": "24h"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/strike-insight/history",
+  "method": "GET",
+  "group": "scanner/strategy",
+  "description": "Bucketed price/IV/OI history of one strike & option_type over the window (bucket_ms + buckets[]).",
+  "notes": "",
+  "pages": [
+   "strike-insight"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 969,
+  "size_bytes": 6192,
+  "response_shape": "{asset:str,expiry:str,strike:float,option_type:str,source:str,window:str,bucket_ms:int,buckets:[49 x {ts_ms:int,tape_volume:float,tape_buy_volume:float,tape_sell_volume:float,oi:null,rfq_notional_usd:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "strike",
+    "type": "float",
+    "required": true,
+    "example": 83000
+   },
+   {
+    "name": "option_type",
+    "type": "string",
+    "required": true,
+    "allowed": [
+     "C",
+     "P"
+    ],
+    "example": "C"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "window",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "24h",
+     "7d",
+     "30d",
+     "90d"
+    ],
+    "example": "24h"
+   }
+  ]
+ },
+ {
+  "path": "/api/market/strike-insight/events",
+  "method": "GET",
+  "group": "scanner/strategy",
+  "description": "Paginated list of trade events for one strike (total, limit, offset, events[]).",
+  "notes": "",
+  "pages": [
+   "strike-insight"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 324,
+  "size_bytes": 2814,
+  "response_shape": "{asset:str,expiry:str,strike:float,option_type:str,total:int,limit:int,offset:int,events:[20 x {ts_ms:int,kind:str,direction:str,amount:float,price_or_notional_usd:float,strategy:null,source:str}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "strike",
+    "type": "float",
+    "required": true,
+    "example": 83000
+   },
+   {
+    "name": "option_type",
+    "type": "string",
+    "required": true,
+    "allowed": [
+     "C",
+     "P"
+    ],
+    "example": "C"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "window",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "24h",
+     "7d",
+     "30d",
+     "90d"
+    ],
+    "example": "24h"
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "example": 20
+   },
+   {
+    "name": "offset",
+    "type": "int",
+    "required": false,
+    "example": 0
+   }
+  ]
+ },
+ {
+  "path": "/api/market/strike-insight/rfq-strategies",
+  "method": "GET",
+  "group": "scanner/strategy",
+  "description": "Block/RFQ strategies that included this strike in the window; source optional (null = aggregate).",
+  "notes": "",
+  "pages": [
+   "strike-insight"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 325,
+  "size_bytes": 547,
+  "response_shape": "{asset:str,expiry:str,strike:float,source:null,is_aggregate:bool,window:str,strategies:[4 x {strategy:str,count:int,notional_usd:float}],rfq_premium_usd:float,venue_counts:[3 x {source:str,count:int}],computed_at:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "expiry",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "desc": "expiry date from /api/market/expiries",
+    "example": "2026-10-11"
+   },
+   {
+    "name": "strike",
+    "type": "float",
+    "required": true,
+    "example": 83000
+   },
+   {
+    "name": "window",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "24h",
+     "7d",
+     "30d",
+     "90d"
+    ],
+    "example": "24h"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   }
+  ]
+ },
+ {
+  "path": "/api/quant/regime",
+  "method": "GET",
+  "group": "quant",
+  "description": "Vol regime classification model output (Markov regime). Requires Auth0 bearer token (401 Missing token).",
+  "notes": "401 {'detail':'Missing token'} without Authorization: Bearer <Auth0 JWT>.",
+  "pages": [
+   "vol-regime",
+   "quant"
+  ],
+  "auth_required": true,
+  "status": 401,
+  "latency_ms": 252,
+  "size_bytes": 26,
+  "response_shape": "{detail:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/quant/direction",
+  "method": "GET",
+  "group": "quant",
+  "description": "Direction signal model output. Requires bearer token.",
+  "notes": "401 without bearer token.",
+  "pages": [
+   "vol-regime",
+   "quant"
+  ],
+  "auth_required": true,
+  "status": 401,
+  "latency_ms": 240,
+  "size_bytes": 26,
+  "response_shape": "{detail:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/quant/diagnostics",
+  "method": "GET",
+  "group": "quant",
+  "description": "Model diagnostics. Requires bearer token.",
+  "notes": "401 without bearer token.",
+  "pages": [
+   "vol-regime",
+   "quant"
+  ],
+  "auth_required": true,
+  "status": 401,
+  "latency_ms": 280,
+  "size_bytes": 26,
+  "response_shape": "{detail:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/quant/anomaly/recent",
+  "method": "GET",
+  "group": "quant",
+  "description": "Recent tape anomaly detections. Requires bearer token.",
+  "notes": "401 without bearer token.",
+  "pages": [
+   "vol-regime",
+   "quant"
+  ],
+  "auth_required": true,
+  "status": 401,
+  "latency_ms": 327,
+  "size_bytes": 26,
+  "response_shape": "{detail:str}",
+  "params": [
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 20,
+    "example": 20
+   },
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/trades",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Block/RFQ trade ledger (Paradigm, Deribit blocks, Derive, ...) newest first: rfq_id, source, status, legs[], notional_usd, strategy_code/display, spot_at_trade ... Supports offset+limit paging (frontend pages with limit/offset).",
+  "notes": "status/source are free strings (unknown value returns [] not 422). Observed sources: paradigm_drfq, ... ; status FILLED common. limit max 2000 (422 above); offset paging works. status/source are free strings (unknown value => [] not 422). Sources observed in data: paradigm_drfq, okx, deribit, derive, paradigm_ob. Default (no status) returned only FILLED rows. Asset accepted in either case.",
+  "pages": [
+   "blocks",
+   "paradigm-flow",
+   "block-rfq/*"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 597,
+  "size_bytes": 16722,
+  "response_shape": "[20 x {rfq_id:str,source:str,status:str,asset:str,timestamp_ms:int,updated_ms:int,legs:[1 x {...9 keys}],mark_price:float,spot_at_trade:float,combo_id:null,pnl_usd:null,current_premium_usd:null,notional_usd:float,index_price:float,strategy_code:str,strategy_delta:float,action:str,venue:str,quote_currency:str,paradigm_trade_id:str,grfq_id:str,strategy_description:str,strategy_display:str,description:str}]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 100,
+    "example": 20
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "paradigm_drfq",
+     "paradigm_ob",
+     "deribit",
+     "derive",
+     "okx (observed in data; unvalidated)"
+    ],
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "status",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "FILLED",
+     "OPEN",
+     "CANCELED",
+     "EXPIRED (inferred from /api/rfq/stats counters; unvalidated)"
+    ],
+    "example": "FILLED"
+   },
+   {
+    "name": "since_ms",
+    "type": "int(ms)",
+    "required": false
+   },
+   {
+    "name": "offset",
+    "type": "int",
+    "required": false,
+    "default": 0,
+    "example": 0
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/stats",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Block flow totals (counts by status; notional buy/sell/call/put/bullish/bearish USD) for an asset over the last N hours.",
+  "notes": "",
+  "pages": [
+   "blocks",
+   "paradigm-flow",
+   "block-rfq/*"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 345,
+  "size_bytes": 328,
+  "response_shape": "{total:int,filled:int,open:int,canceled:int,expired:int,notional_usd:float,buy_notional_usd:float,sell_notional_usd:float,call_notional_usd:float,put_notional_usd:float,bullish_notional_usd:float,bearish_notional_usd:float}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "hours",
+    "type": "int",
+    "required": false,
+    "example": 24
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/strategy-popularity",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Strategy mix buckets [{strategy,count,notional_usd,premium_usd,pct}] over the last N hours.",
+  "notes": "",
+  "pages": [
+   "blocks",
+   "block-rfq/*"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 339,
+  "size_bytes": 2188,
+  "response_shape": "{buckets:[20 x {strategy:str,count:int,notional_usd:float,premium_usd:float,pct:float}],total:int}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "hours",
+    "type": "int",
+    "required": false,
+    "example": 24
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/settlement-price",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Settlement price of an expired expiry (asset, expiry_date YYYY-MM-DD); used to PnL block trades.",
+  "notes": "",
+  "pages": [
+   "block-rfq/*"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 346,
+  "size_bytes": 89,
+  "response_shape": "{asset:str,expiry_date:str,settlement_price:float,source:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "expiry_date",
+    "type": "string(YYYY-MM-DD)",
+    "required": true,
+    "example": "2026-10-09"
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/telegram/health",
+  "method": "GET",
+  "group": "health",
+  "description": "Health of the Telegram block feed ingester: connected, last_message_ms, error, phase.",
+  "notes": "",
+  "pages": [
+   "blocks",
+   "paradigm-flow",
+   "rfq-tape"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 362,
+  "size_bytes": 76,
+  "response_shape": "{connected:bool,last_message_ms:int,error:null,phase:null}",
+  "params": []
+ },
+ {
+  "path": "/api/rfq/deribit/health",
+  "method": "GET",
+  "group": "health",
+  "description": "Health of the Deribit block feed.",
+  "notes": "",
+  "pages": [
+   "blocks",
+   "paradigm-flow",
+   "rfq-tape"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 330,
+  "size_bytes": 76,
+  "response_shape": "{connected:bool,last_message_ms:int,error:null,phase:null}",
+  "params": []
+ },
+ {
+  "path": "/api/rfq/paradigm/health",
+  "method": "GET",
+  "group": "health",
+  "description": "Health of the Paradigm (legacy) feed; connected=false at test time.",
+  "notes": "",
+  "pages": [
+   "blocks",
+   "paradigm-flow",
+   "rfq-tape",
+   "block-rfq/paradigm"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 276,
+  "size_bytes": 65,
+  "response_shape": "{connected:bool,last_message_ms:int,error:null,phase:null}",
+  "params": []
+ },
+ {
+  "path": "/api/rfq/paradigm-drfq/health",
+  "method": "GET",
+  "group": "health",
+  "description": "Health of the Paradigm DRFQ feed.",
+  "notes": "",
+  "pages": [
+   "blocks",
+   "paradigm-flow",
+   "rfq-tape",
+   "block-rfq/paradigm"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 259,
+  "size_bytes": 78,
+  "response_shape": "{connected:bool,last_message_ms:int,error:null,phase:str}",
+  "params": []
+ },
+ {
+  "path": "/api/rfq/paradigm-ob/health",
+  "method": "GET",
+  "group": "health",
+  "description": "Health of the Paradigm orderbook feed.",
+  "notes": "",
+  "pages": [
+   "blocks",
+   "paradigm-flow",
+   "rfq-tape",
+   "block-rfq/paradigm"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 265,
+  "size_bytes": 78,
+  "response_shape": "{connected:bool,last_message_ms:int,error:null,phase:str}",
+  "params": []
+ },
+ {
+  "path": "/api/rfq/insights/whale-leaderboard",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Largest block trades in the window ranked by notional (trades[] with net_delta, direction_label, legs).",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 592,
+  "size_bytes": 14966,
+  "response_shape": "{window_hours:int,trades:[20 x {rfq_id:str,source:str,timestamp_ms:int,strategy_code:str,strategy_description:str,notional_usd:float,net_delta:float,net_vega_usd:null,direction_label:str,spot_at_trade:float,index_price:float,legs:[1 x {...9 keys}]}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "hours",
+    "type": "int",
+    "required": false,
+    "default": 24,
+    "example": 24
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 20,
+    "example": 20
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/insights/strategy-rotation",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Strategy-family notional per time bucket (directional/vol/spread/complex) over N days.",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 277,
+  "size_bytes": 10910,
+  "response_shape": "{family_order:[4 x str],buckets:[31 x {bucket_start_ms:int,total_notional_usd:float,families:{...4 keys}}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "days",
+    "type": "int",
+    "required": false,
+    "default": 30,
+    "example": 30
+   },
+   {
+    "name": "bucket_hours",
+    "type": "int",
+    "required": false,
+    "default": 24,
+    "example": 24
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/insights/net-delta-tape",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Cumulative net delta of block flow: points[{t_ms,bucket_delta,cum_delta}] per bucket_minutes.",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 686,
+  "size_bytes": 13888,
+  "response_shape": "{asset_units:str,window_hours:int,skipped_legs:int,includes_perps:bool,points:[169 x {t_ms:int,bucket_delta:float,cum_delta:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "hours",
+    "type": "int",
+    "required": false,
+    "default": 168,
+    "example": 168
+   },
+   {
+    "name": "bucket_minutes",
+    "type": "int",
+    "required": false,
+    "default": 60,
+    "example": 60
+   },
+   {
+    "name": "include_perps",
+    "type": "bool",
+    "required": false,
+    "default": false,
+    "example": "false"
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/insights/strike-ladder",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Block notional by expiry x strike (call/put/total + trade_count) for the window.",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 982,
+  "size_bytes": 104905,
+  "response_shape": "{cells:[597 x {expiry:str,expiry_ms:int,strike:float,call_notional_usd:float,put_notional_usd:float,total_notional_usd:float,trade_count:int}],expiries:[40 x str],strikes:[80 x float]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "hours",
+    "type": "int",
+    "required": false,
+    "default": 720,
+    "example": 720
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/insights/vol-flow-gauge",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Net vega bought/sold by blocks in the window (many trades may be 'skipped' if IV unavailable).",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 237,
+  "size_bytes": 127,
+  "response_shape": "{window_hours:int,trade_count:int,skipped_trades:int,buy_vega_usd:float,sell_vega_usd:float,net_vega_usd:float,by_code:[]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "hours",
+    "type": "int",
+    "required": false,
+    "default": 24,
+    "example": 24
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/insights/iv-prints",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "IV prints of block trades (points[]); empty at test time.",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 261,
+  "size_bytes": 32,
+  "response_shape": "{window_hours:int,points:[]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "hours",
+    "type": "int",
+    "required": false,
+    "default": 168,
+    "example": 168
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 2000,
+    "example": 200
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/insights/strategy-bursts",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Z-score alerts when a strategy code's count in window exceeds its baseline_days history.",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 355,
+  "size_bytes": 368,
+  "response_shape": "{window_hours:int,baseline_days:int,alerts:[1 x {strategy_code:str,current_count:int,baseline_mean:float,baseline_std:float,z_score:float,daily_counts:[14 x int],sample_rfq_ids:[3 x str]}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "BTC",
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "window_hours",
+    "type": "int",
+    "required": false,
+    "default": 24,
+    "example": 24
+   },
+   {
+    "name": "baseline_days",
+    "type": "int",
+    "required": false,
+    "default": 14,
+    "example": 14
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/insights/trade-decode",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Decode of a single RFQ by rfq_id: legs, payoff curve (spots, pnl_usd), breakevens, max profit/loss, net greeks.",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 418,
+  "size_bytes": 5038,
+  "response_shape": "{rfq_id:str,source:str,strategy_code:str,strategy_description:str,description:str,timestamp_ms:int,spot_at_trade:float,index_price:float,notional_usd:float,legs:[1 x {instrument:str,direction:str,amount:float,price:float,ratio:float,delta:float,iv:null,vega:null,role:null}],payoff:{spots:[121 x float],pnl_usd:[121 x float]},breakevens:[1 x float],max_profit_usd:null,max_loss_usd:float,payoff_caveat:null,net_greeks:{delta:float,vega_usd:null,gamma:null,theta_usd:null}}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "rfq_id",
+    "type": "string",
+    "required": true,
+    "example": "drfq-bt_3KV3HrHKTXlL5LMz3aMynErlExE"
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/notional-bars",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Telegram-block analysis: daily notional by strategy (empty array at test time).",
+  "notes": "Returned [] for BTC and ETH: dataset empty at test time.",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 527,
+  "size_bytes": 2,
+  "response_shape": "[]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "window_days",
+    "type": "int",
+    "required": false,
+    "default": 7,
+    "example": 7
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/strike-heatmap",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Telegram-block analysis: notional by strike x expiry (empty at test time).",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 959,
+  "size_bytes": 2,
+  "response_shape": "[]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "since_days",
+    "type": "int",
+    "required": false,
+    "default": 30,
+    "example": 30
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/iv-surface",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Telegram-block analysis: average IV by strike x expiry (empty at test time).",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 341,
+  "size_bytes": 2,
+  "response_shape": "[]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "since_days",
+    "type": "int",
+    "required": false,
+    "default": 30,
+    "example": 30
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/hourly-heatmap",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Telegram-block analysis: notional/count by weekday x hour UTC (168 rows, all zeros at test time).",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 871,
+  "size_bytes": 8835,
+  "response_shape": "[168 x {hour:int,weekday:int,notional_usd:float,count:int}]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/block-size-histogram",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Telegram-block analysis: block-size histogram buckets (all zero at test time).",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 876,
+  "size_bytes": 638,
+  "response_shape": "[7 x {label:str,min_usd:float,max_usd:float,count:int,total_notional:float}]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/strategy-over-time",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Telegram-block analysis: monthly strategy share of notional (empty at test time).",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 891,
+  "size_bytes": 2,
+  "response_shape": "[]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "lookback_months",
+    "type": "int",
+    "required": false,
+    "default": 24,
+    "example": 24
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/big-blocks",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Telegram-block analysis: blocks above min_notional in last since_days (empty at test time).",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 554,
+  "size_bytes": 2,
+  "response_shape": "[]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "min_notional",
+    "type": "float",
+    "required": false,
+    "default": 10000000,
+    "example": 0
+   },
+   {
+    "name": "since_days",
+    "type": "int",
+    "required": false,
+    "default": 7,
+    "example": 7
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/similar-trades",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Historical analogs of a strategy_code (+optional strike) from telegram blocks.",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 271,
+  "size_bytes": 5657,
+  "response_shape": "[20 x {rfq_id:str,timestamp_ms:int,notional_usd:float,spot_at_trade:float,spot_ratio:null,strike:int,legs:[2 x {...3 keys}]}]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "strategy_code",
+    "type": "string",
+    "required": true,
+    "example": "CS"
+   },
+   {
+    "name": "strike",
+    "type": "float",
+    "required": false
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 20,
+    "example": 20
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/strike-clusters",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Strikes hit by >= min_count institutions inside window_hours (empty at test time).",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 347,
+  "size_bytes": 2,
+  "response_shape": "[]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "window_hours",
+    "type": "int",
+    "required": false,
+    "default": 2,
+    "example": 2
+   },
+   {
+    "name": "min_count",
+    "type": "int",
+    "required": false,
+    "default": 3,
+    "example": 3
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/put-call-ratio",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Daily institutional put/call notional (empty at test time).",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 636,
+  "size_bytes": 2,
+  "response_shape": "[]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "default": 90,
+    "example": 90
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/expiry-concentration",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Notional concentration by expiry (empty at test time).",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 836,
+  "size_bytes": 2,
+  "response_shape": "[]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "since_days",
+    "type": "int",
+    "required": false,
+    "default": 90,
+    "example": 90
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/leg-count-distribution",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Distribution of leg counts (1,2,3,4+) with count and notional.",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 856,
+  "size_bytes": 181,
+  "response_shape": "[4 x {leg_count:int,count:int,notional_usd:float}]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "since_days",
+    "type": "int",
+    "required": false,
+    "default": 90,
+    "example": 90
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/instrument-frequency",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Most-traded instruments from blocks (empty at test time).",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 257,
+  "size_bytes": 2506,
+  "response_shape": "[20 x {instrument:str,count:int,notional_usd:float,first_seen_ms:int,last_seen_ms:int}]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "since_days",
+    "type": "int",
+    "required": false,
+    "default": 90,
+    "example": 90
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 20,
+    "example": 20
+   }
+  ]
+ },
+ {
+  "path": "/api/rfq/tg/strategy-burst-detection",
+  "method": "GET",
+  "group": "flow/rfq/blocks",
+  "description": "Windows where >= min_count same-strategy trades fired within window_minutes.",
+  "notes": "",
+  "pages": [
+   "block-rfq/paradigm (ParadigmTgAnalysis panels)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 340,
+  "size_bytes": 590,
+  "response_shape": "[7 x {strategy_code:str,window_start_ms:int,count:int,notional_usd:float}]",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol",
+    "example": "BTC"
+   },
+   {
+    "name": "window_minutes",
+    "type": "int",
+    "required": false,
+    "default": 30,
+    "example": 30
+   },
+   {
+    "name": "min_count",
+    "type": "int",
+    "required": false,
+    "default": 3,
+    "example": 3
+   }
+  ]
+ },
+ {
+  "path": "/api/orderflow/footprint",
+  "method": "GET",
+  "group": "orderflow",
+  "description": "Footprint bars from perp futures trades (Bybit BTCUSDT): per bar price levels with buy/sell volume, poc, cum_delta. tf seconds in {60,300,900,1800,3600,7200}.",
+  "notes": "tf must be one of 60,300,900,1800,3600,7200 seconds (400/422 otherwise). Data comes from Bybit linear perps; symbol e.g. BTCUSDT.",
+  "pages": [
+   "orderflow-v2",
+   "order-flow"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 324,
+  "size_bytes": 13216,
+  "response_shape": "{asset:str,symbol:str,source:str,tf:int,bars:[20 x {ts:int,open_time:int,tf:int,levels:{...34 keys},poc:float,total_buy:float,total_sell:float,total_buy_usd:float,total_sell_usd:float,cum_delta:float,max_delta:float,min_delta:float,total_trades:int}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "tf",
+    "type": "int(seconds)",
+    "required": false,
+    "default": 60,
+    "allowed": [
+     60,
+     300,
+     900,
+     1800,
+     3600,
+     7200
+    ],
+    "example": 60
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 60,
+    "example": 60
+   }
+  ]
+ },
+ {
+  "path": "/api/orderflow/cvd",
+  "method": "GET",
+  "group": "orderflow",
+  "description": "Cumulative volume delta points (ts ms, value) + running total.",
+  "notes": "",
+  "pages": [
+   "orderflow-v2"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 361,
+  "size_bytes": 4889,
+  "response_shape": "{asset:str,symbol:str,source:str,running:float,points:[100 x {ts:int,value:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 500,
+    "example": 500
+   }
+  ]
+ },
+ {
+  "path": "/api/orderflow/vd",
+  "method": "GET",
+  "group": "orderflow",
+  "description": "Volume-delta bars bucketed by trade size (bucket_labels: $0-1k ... ) per tf.",
+  "notes": "",
+  "pages": [
+   "orderflow-v2"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 272,
+  "size_bytes": 10401,
+  "response_shape": "{asset:str,symbol:str,source:str,tf:int,bucket_labels:[8 x str],bars:[50 x {ts:int,open_time:int,tf:int,buy:[8 x float],sell:[8 x float]}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "tf",
+    "type": "int(seconds)",
+    "required": false,
+    "default": 60,
+    "allowed": [
+     60,
+     300,
+     900,
+     1800,
+     3600,
+     7200
+    ],
+    "example": 60
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 200,
+    "example": 200
+   }
+  ]
+ },
+ {
+  "path": "/api/orderflow/tpo",
+  "method": "GET",
+  "group": "orderflow",
+  "description": "TPO / market-profile sessions with price-level letters/counts per session.",
+  "notes": "",
+  "pages": [
+   "orderflow-v2"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 448,
+  "size_bytes": 29679,
+  "response_shape": "{asset:str,symbol:str,source:str,sessions:[5 x {session_start_ms:int,ts:int,levels:{...160 keys}}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 20,
+    "example": 20
+   }
+  ]
+ },
+ {
+  "path": "/api/orderflow/liquidations",
+  "method": "GET",
+  "group": "orderflow",
+  "description": "Recent perp liquidation events (ts, side, price, qty, qty_usd, source).",
+  "notes": "",
+  "pages": [
+   "orderflow-v2"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 259,
+  "size_bytes": 5155,
+  "response_shape": "{asset:str,symbol:str,events:[50 x {ts:int,side:str,price:float,qty:float,qty_usd:float,source:str}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 100,
+    "example": 100
+   }
+  ]
+ },
+ {
+  "path": "/api/orderflow/oi",
+  "method": "GET",
+  "group": "orderflow",
+  "description": "Perp open-interest time series (value in coin and value_usd, interval).",
+  "notes": "",
+  "pages": [
+   "orderflow-v2"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 454,
+  "size_bytes": 8651,
+  "response_shape": "{asset:str,symbol:str,source:str,points:[100 x {ts:int,value:float,value_usd:float,interval:str}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "default": 200,
+    "example": 200
+   }
+  ]
+ },
+ {
+  "path": "/api/orderflow/heatmap",
+  "method": "GET",
+  "group": "orderflow",
+  "description": "Order-book liquidity heatmap: timestamps x prices with bid_matrix/ask_matrix (293 KB for 50 snapshots; ~1.1 MB at 200).",
+  "notes": "",
+  "pages": [
+   "orderflow-v2"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 965,
+  "size_bytes": 293345,
+  "response_shape": "{asset:str,symbol:str,source:str,timestamps:[50 x int],prices:[256 x float],bid_matrix:[50 x [256 x float]],ask_matrix:[50 x [256 x float]]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "snapshots",
+    "type": "int",
+    "required": false,
+    "default": 200,
+    "example": 200
+   }
+  ]
+ },
+ {
+  "path": "/api/futures/basis",
+  "method": "GET",
+  "group": "futures",
+  "description": "All futures/perp contracts for the asset across venues: mark, index, premium_pct, apr_pct, funding, OI, 24h volume, expiry.",
+  "notes": "",
+  "pages": [
+   "futures/basis",
+   "futures/term-structure",
+   "basis",
+   "history",
+   "term-structure"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 447,
+  "size_bytes": 20804,
+  "response_shape": "{asset:str,items:[54 x {source:str,instrument:str,kind:str,quote_currency:str,expiry_date:null,mark_price:float,index_price:float,premium_pct:float,apr_pct:float,funding_rate_8h:float,funding_rate_annualized:float,open_interest:float,volume_24h:float,days_to_expiry:null,change_24h_pct:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/futures/funding/current",
+  "method": "GET",
+  "group": "futures",
+  "description": "Current perp funding by venue: funding_rate_8h, annualised, mark. Empty items for assets without perps (hype).",
+  "notes": "",
+  "pages": [
+   "futures/funding",
+   "funding"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 652,
+  "size_bytes": 634,
+  "response_shape": "{asset:str,items:[4 x {source:str,funding_rate_8h:float,funding_rate_annualized:float,next_funding_ts_ms:null,mark_price:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/futures/funding/history",
+  "method": "GET",
+  "group": "futures",
+  "description": "Funding-rate history points for one venue over N days.",
+  "notes": "",
+  "pages": [
+   "futures/funding",
+   "funding"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 247,
+  "size_bytes": 8376,
+  "response_shape": "{asset:str,source:str,points:[90 x {ts_ms:int,funding_rate_8h:float,funding_rate_annualized:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "days",
+    "type": "int",
+    "required": false,
+    "example": 30
+   }
+  ]
+ },
+ {
+  "path": "/api/futures/history",
+  "method": "GET",
+  "group": "futures",
+  "description": "Basis (basis_pct, apr_pct, mark) history for one futures instrument over N days.",
+  "notes": "",
+  "pages": [
+   "futures/history",
+   "history"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 453,
+  "size_bytes": 10581,
+  "response_shape": "{asset:str,instrument:str,source:str,points:[99 x {ts_ms:int,basis_pct:float,apr_pct:null,mark_price:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "instrument",
+    "type": "string",
+    "required": true,
+    "example": "BTC-PERPETUAL"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "days",
+    "type": "int",
+    "required": false,
+    "example": 7
+   }
+  ]
+ },
+ {
+  "path": "/api/backtest/meta",
+  "method": "GET",
+  "group": "backtest",
+  "description": "Backtest data catalogue: data window (~97 d), expiries with calls/puts instruments & first/last candle timestamps. 250 KB.",
+  "notes": "",
+  "pages": [
+   "backtest"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1394,
+  "size_bytes": 250168,
+  "response_shape": "{asset:str,data_window_days:int,oldest_ts_ms:int,newest_ts_ms:int,expiries:[22 x {expiry_str:str,expiry_date_iso:str,expiry_ts_ms:int,first_candle_ts_ms:int,last_candle_ts_ms:int,calls:[26 x {...5 keys}],puts:[26 x {...5 keys}],reference_spot:float}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   }
+  ]
+ },
+ {
+  "path": "/api/backtest/spot-at",
+  "method": "GET",
+  "group": "backtest",
+  "description": "Historic spot at ts_ms: {spot, spot_ts_ms, is_stale}.",
+  "notes": "",
+  "pages": [
+   "backtest"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 803,
+  "size_bytes": 61,
+  "response_shape": "{spot:float,spot_ts_ms:int,is_stale:bool}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   },
+   {
+    "name": "ts_ms",
+    "type": "int(ms)",
+    "required": true,
+    "example": "1791543325417"
+   }
+  ]
+ },
+ {
+  "path": "/api/backtest/v2/meta",
+  "method": "GET",
+  "group": "backtest",
+  "description": "v2 backtest catalogue. Requires bearer token.",
+  "notes": "401 without bearer token.",
+  "pages": [
+   "backtest"
+  ],
+  "auth_required": true,
+  "status": 401,
+  "latency_ms": 261,
+  "size_bytes": 26,
+  "response_shape": "{detail:str}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   },
+   {
+    "name": "source",
+    "type": "string",
+    "required": false,
+    "desc": "single venue",
+    "example": "deribit"
+   }
+  ]
+ },
+ {
+  "path": "/api/health/sources/history",
+  "method": "GET",
+  "group": "health",
+  "description": "Per-venue connectivity history strip. Requires bearer token (401) although the Sources page shows it.",
+  "notes": "401 without bearer token.",
+  "pages": [
+   "sources"
+  ],
+  "auth_required": true,
+  "status": 401,
+  "latency_ms": 242,
+  "size_bytes": 26,
+  "response_shape": "{detail:str}",
+  "params": [
+   {
+    "name": "hours",
+    "type": "int",
+    "required": false,
+    "default": 24,
+    "example": 24
+   }
+  ]
+ },
+ {
+  "path": "/api/sources",
+  "method": "GET",
+  "group": "health",
+  "description": "Live connectivity of each options data venue: enabled, connected, last_message_ms, upstream ws_url. Public.",
+  "notes": "",
+  "pages": [
+   "sources"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 259,
+  "size_bytes": 1291,
+  "response_shape": "[10 x {name:str,enabled:bool,connected:bool,last_message_ms:int,ws_url:str}]",
+  "params": []
+ },
+ {
+  "path": "/api/site-notice",
+  "method": "GET",
+  "group": "meta",
+  "description": "Optional site-wide banner JSON; 404 when no notice is active.",
+  "notes": "",
+  "pages": [
+   "(banner on all pages)"
+  ],
+  "auth_required": false,
+  "status": 404,
+  "latency_ms": 242,
+  "size_bytes": 0,
+  "response_shape": "",
+  "params": []
+ },
+ {
+  "path": "/api/posts",
+  "method": "GET",
+  "group": "posts",
+  "description": "Daily commentary posts list {posts:[]} (empty at test time). /api/posts/{id} fetches one.",
+  "notes": "",
+  "pages": [
+   "posts",
+   "posts/:date"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 249,
+  "size_bytes": 12,
+  "response_shape": "{posts:[]}",
+  "params": []
+ },
+ {
+  "path": "/api/og",
+  "method": "GET",
+  "group": "meta",
+  "description": "Open Graph PNG image for the asset (binary, ~36 KB).",
+  "notes": "",
+  "pages": [
+   "(Open Graph image)"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 677,
+  "size_bytes": 35782,
+  "response_shape": "(binary image/png)",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string",
+    "required": false,
+    "default": "btc",
+    "desc": "underlying symbol, see /api/market/sources-all",
+    "example": "btc"
+   }
+  ]
+ },
+ {
+  "path": "/api/ibit/chain/all",
+  "method": "GET",
+  "group": "ibit",
+  "description": "Full IBIT (BlackRock Bitcoin ETF) options chain from ThetaData: contracts[2,962] with bid/ask/mark/IV/greeks/OI. 1.2 MB.",
+  "notes": "IBIT implied_volatility is a FRACTION (0.49 = 49%) unlike the crypto endpoints which return percent points.",
+  "pages": [
+   "ibit/*"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1929,
+  "size_bytes": 1243567,
+  "response_shape": "{contracts:[2962 x {ticker:str,strike:float,expiration_date:str,contract_type:str,last_price:float,volume:float,open_interest:int,implied_volatility:float,iv_source:str,day_change:null,day_change_pct:null,bid_price:float,ask_price:float,mark_price:float,bid_size:int,ask_size:int,delta:float,gamma:float,theta:float,vega:float,source:str}],total:int}",
+  "params": []
+ },
+ {
+  "path": "/api/ibit/spot",
+  "method": "GET",
+  "group": "ibit",
+  "description": "IBIT daily/intraday candles {ticker,candles[{ts_ms,open,high,low,close,volume}]}.",
+  "notes": "",
+  "pages": [
+   "ibit/chart",
+   "ibit/*"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 992,
+  "size_bytes": 66337,
+  "response_shape": "{ticker:str,candles:[689 x {ts_ms:int,open:float,high:float,low:float,close:float,volume:float}],status:str}",
+  "params": [
+   {
+    "name": "tf",
+    "type": "string",
+    "required": false,
+    "default": "1D",
+    "allowed": [
+     "1m",
+     "5m",
+     "15m",
+     "30m",
+     "1H",
+     "4H",
+     "1D"
+    ],
+    "example": "1D"
+   }
+  ]
+ },
+ {
+  "path": "/api/ibit/spot-ref",
+  "method": "GET",
+  "group": "ibit",
+  "description": "BTC reference bars aligned to IBIT bars (close, hlc3, venues used) for premium/discount calcs.",
+  "notes": "",
+  "pages": [
+   "ibit/chart"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 3226,
+  "size_bytes": 58838,
+  "response_shape": "{tf:str,venues:[3 x str],bars:[936 x {ts_ms:int,close:float,hlc3:float,n:int}]}",
+  "params": [
+   {
+    "name": "tf",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "1m",
+     "5m",
+     "15m",
+     "30m",
+     "1H",
+     "4H",
+     "1D"
+    ],
+    "example": "5m"
+   }
+  ]
+ },
+ {
+  "path": "/api/ibit/dealer-gex",
+  "method": "GET",
+  "group": "ibit",
+  "description": "IBIT dealer GEX model: totals, regime, key levels (flip/support/resistance) and ladder per strike.",
+  "notes": "",
+  "pages": [
+   "ibit/greeks"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1923,
+  "size_bytes": 33950,
+  "response_shape": "{model:str,spot:float,btc_per_share:float,provisional:bool,totals:{gex:float,gex_prev:float,vanna:float,charm:float,dex:float},regime:str,levels:{resistance:{price:float,btc:float},support:{price:float,btc:float},acceleration:{price:float,btc:float},flip:{price:float,btc:float}},ladder:[124 x {strike:float,btc:float,gex:float,gex_call:float,gex_put:float,gex_prev:float,charm:float,dealer_call:float,dealer_put:float,oi_call:float,oi_put:float}],profile:[161 x {spot:float,gex:float,charm:float}],by_expiry:[28 x {expiry:str,gex:float}],quality:{contracts:int,contracts_no_iv:int,iv_filled:int,oi_total:float,directional_pct:float},window:str,market_open:bool,as_of_ms:int,flow:{first_session:str,last_session:str,sessions:int,rho:float,last_session_mix:{decisive_pct:float,lean_pct:float,unknown_pct:float,multi_leg_pct:float}}}",
+  "params": [
+   {
+    "name": "model",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "flow",
+     "naive"
+    ],
+    "example": "flow"
+   },
+   {
+    "name": "window",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "all",
+     "30",
+     "7"
+    ],
+    "example": "all"
+   }
+  ]
+ },
+ {
+  "path": "/api/ibit/gex-map",
+  "method": "GET",
+  "group": "ibit",
+  "description": "IBIT GEX/charm map over time: times (epoch s), s_grid, matrix. 690 KB.",
+  "notes": "",
+  "pages": [
+   "ibit/greeks"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1785,
+  "size_bytes": 691917,
+  "response_shape": "{ready:bool,model:str,window:str,greek:str,bar:str,charm_progress:null,times:[473 x int],s_grid:[259 x float],matrix:[259 x [473 x int]],abs_max:float,candles:[473 x {t:int,o:float,h:float,l:float,c:float}],days:[473 x {session:str,t:int,spot:float,net_gex:float,flip:float,resistance:float,support:float,acceleration:float,provisional:bool}],backfill:{first_session:str,sessions:int,target_first:str}}",
+  "params": [
+   {
+    "name": "model",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "flow",
+     "naive"
+    ],
+    "example": "flow"
+   },
+   {
+    "name": "window",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "all",
+     "30",
+     "7"
+    ],
+    "example": "all"
+   },
+   {
+    "name": "bar",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "1d",
+     "30m"
+    ],
+    "example": "1d"
+   },
+   {
+    "name": "greek",
+    "type": "string",
+    "required": false,
+    "default": "gamma",
+    "desc": "'charm' optional"
+   }
+  ]
+ },
+ {
+  "path": "/api/ibit/flow-agg",
+  "method": "GET",
+  "group": "ibit",
+  "description": "IBIT options flow aggregate for window_h (same shape as /api/market/flow-agg).",
+  "notes": "",
+  "pages": [
+   "ibit/flow"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1664,
+  "size_bytes": 272570,
+  "response_shape": "{asset:str,window_h:int,as_of_ms:int,summary:{call_premium_usd:float,put_premium_usd:float,net_flow_usd:float,call_put_ratio:float,total_trades:int,call_trades:int,put_trades:int,flow_ratio:float,call_buys_premium:float,call_sells_premium:float,put_buys_premium:float,put_sells_premium:float},top_trades:[20 x {ts_ms:int,instrument:str,option_type:str,direction:str,amount:float,premium_usd:float,iv:null,strike:float,expiry_date:str,source:str}],flow_by_expiry:[29 x {expiry_date:str,call_premium_usd:float,put_premium_usd:float,net_flow_usd:float,call_trades:int,put_trades:int,call_buys_premium:float,call_sells_premium:float,put_buys_premium:float,put_sells_premium:float,by_strike:[39 x {...5 keys}]}],flow_by_strike:[102 x {strike:float,call_buys_premium:float,call_sells_premium:float,put_buys_premium:float,put_sells_premium:float,by_expiry:[2 x {...5 keys}]}],moneyness:[5 x {bucket:str,call_buys_premium:float,call_sells_premium:float,put_buys_premium:float,put_sells_premium:float}],generated_at:str}",
+  "params": [
+   {
+    "name": "window_h",
+    "type": "int",
+    "required": false,
+    "example": 24
+   }
+  ]
+ },
+ {
+  "path": "/api/ibit/flow-wheel",
+  "method": "GET",
+  "group": "ibit",
+  "description": "IBIT taker flow by calls/puts bought/sold in contracts, premium, notional over N sessions.",
+  "notes": "",
+  "pages": [
+   "ibit/flow"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 852,
+  "size_bytes": 481,
+  "response_shape": "{contracts:{calls_bought:float,calls_sold:float,puts_bought:float,puts_sold:float},premium:{calls_bought:float,calls_sold:float,puts_bought:float,puts_sold:float},notional:{calls_bought:float,calls_sold:float,puts_bought:float,puts_sold:float},trade_count:int,lookback_hours:int,sessions:int,unclassified_contracts:float,as_of_ms:int}",
+  "params": [
+   {
+    "name": "sessions",
+    "type": "int",
+    "required": false,
+    "default": 7,
+    "example": 7
+   }
+  ]
+ },
+ {
+  "path": "/api/ibit/iv-rank",
+  "method": "GET",
+  "group": "ibit",
+  "description": "IBIT IV rank/percentile with history (365 d).",
+  "notes": "",
+  "pages": [
+   "ibit/vol"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 261,
+  "size_bytes": 8423,
+  "response_shape": "{available:bool,samples:int,lookback_days:int,current_iv:float,min_iv:float,max_iv:float,iv_rank:float,iv_percentile:float,regime:str,history:[251 x {date:str,iv:float}]}",
+  "params": []
+ },
+ {
+  "path": "/api/ibit/oi-history",
+  "method": "GET",
+  "group": "ibit",
+  "description": "IBIT open interest by date x strike (contracts, multiplier 100). 450 KB.",
+  "notes": "",
+  "pages": [
+   "ibit/oi"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1903,
+  "size_bytes": 452163,
+  "response_shape": "{ready:bool,unit:str,multiplier:int,dates:[126 x str],report_dates:[126 x str],latest:str,by_strike:[16028 x [4 x int]],by_expiry:[3098 x [4 x int]],chain:[1379 x [4 x str]]}",
+  "params": [
+   {
+    "name": "days",
+    "type": "int",
+    "required": false,
+    "default": 180,
+    "example": 180
+   }
+  ]
+ },
+ {
+  "path": "/api/ibit/spot-vol-skew",
+  "method": "GET",
+  "group": "ibit",
+  "description": "Intraday points [ts_ms, spot, iv, skew] per bar.",
+  "notes": "",
+  "pages": [
+   "ibit/vol"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 605,
+  "size_bytes": 52168,
+  "response_shape": "{bar:str,points:[1506 x [4 x int]],skew_points:int}",
+  "params": [
+   {
+    "name": "bar",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "1d",
+     "1h",
+     "30m",
+     "15m",
+     "5m"
+    ],
+    "example": "1h"
+   }
+  ]
+ },
+ {
+  "path": "/api/ibit/trades",
+  "method": "GET",
+  "group": "ibit",
+  "description": "IBIT option trade tape (ThetaData) newest first; rows in the same schema as /api/market/trades/aggregate.",
+  "notes": "",
+  "pages": [
+   "ibit/flow"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 566,
+  "size_bytes": 35646,
+  "response_shape": "{provenance:{sources:[1 x str],count:int,since_ms:int,per_source:{thetadata:{...3 keys}}},rows:[100 x {source:str,instrument:str,expiry_date:str,strike:float,option_type:str,ts_ms:int,recv_ts_ms:int,trade_id:str,price:float,amount:float,direction:str,iv:null,underlying_price:null,bid:float,ask:float,venue:str,multi_leg:bool,method:int}]}",
+  "params": [
+   {
+    "name": "limit",
+    "type": "int",
+    "required": false,
+    "example": 100
+   }
+  ]
+ },
+ {
+  "path": "/api/ibit/vrp",
+  "method": "GET",
+  "group": "ibit",
+  "description": "IBIT variance risk premium: current iv30/rv20/rv30/vrp and series.",
+  "notes": "",
+  "pages": [
+   "ibit/vol"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 958,
+  "size_bytes": 23841,
+  "response_shape": "{available:bool,bar:str,iv_history_warming:bool,target_days:int,market_open:bool,current:{iv30:float,rv20:float,rv30:float,vrp:float,ratio:float},series:[251 x {ts_ms:int,date:str,iv30:float,rv20:float,rv30:float,vrp:float}]}",
+  "params": [
+   {
+    "name": "bar",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "1d",
+     "1h"
+    ],
+    "example": "1d"
+   },
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "example": 365
+   }
+  ]
+ },
+ {
+  "path": "/api/ibit/btc-iv-spread",
+  "method": "GET",
+  "group": "ibit",
+  "description": "IBIT IV vs BTC IV (per venue) spread time series.",
+  "notes": "",
+  "pages": [
+   "ibit/vol"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 775,
+  "size_bytes": 8499,
+  "response_shape": "{available:bool,bar:str,sources:[1 x str],venues:[10 x {source:str,since:str}],target_days:int,market_open:bool,ibit:{current:float,as_of_ms:int,series:[69 x {...3 keys}]},exchanges:[1 x {source:str,history_start:str,current:{...5 keys},btc_now:{...2 keys},series:[69 x {...3 keys}]}]}",
+  "params": [
+   {
+    "name": "bar",
+    "type": "string",
+    "required": false,
+    "allowed": [
+     "1d",
+     "1h"
+    ],
+    "example": "1d"
+   },
+   {
+    "name": "sources",
+    "type": "csv",
+    "required": false,
+    "example": "deribit"
+   },
+   {
+    "name": "lookback_days",
+    "type": "int",
+    "required": false,
+    "example": 365
+   }
+  ]
+ },
+ {
+  "path": "/api/backtest/run",
+  "method": "POST",
+  "group": "backtest",
+  "description": "Options position backtest on stored 5-minute candles (~97 days). Instruments come from /api/backtest/meta (note unpadded day: BTC-9OCT26-82000-C). Works without login. Called once with a 1-leg long call, 2-day hold: 161 KB, 1.5 s.",
+  "notes": "Error bodies are plain-text JSON {detail} (e.g. 'No option_candles data for instruments=...'). legs max 2 in the UI (spreads/straddles).",
+  "pages": [
+   "backtest"
+  ],
+  "auth_required": false,
+  "status": 200,
+  "latency_ms": 1544,
+  "size_bytes": 164980,
+  "response_shape": "{entry:{ts_ms,spot,premium_usd,net_delta,net_gamma,net_theta_per_day,net_vega_per_1pct,iv,dte,entry_gap_minutes,entry_fee_usd},exit:{ts_ms,spot,pnl_usd,pnl_pct,exit_reason,dte,max_loss_unbounded,exit_bar_unreliable,exit_fee_usd,pnl_usd_after_fees,pnl_pct_after_fees,structural_max_loss_usd,structural_max_profit_usd,pnl_exceeds_max_loss,pnl_exceeds_max_profit,settled_at_intrinsic},series:[N x {ts_ms,spot,spot_open,spot_high,spot_low,pnl_usd,delta_pnl_usd,theta_pnl_usd,vega_pnl_usd,gamma_pnl_usd,unexplained_pnl_usd,iv,dte}]}",
+  "params": [
+   {
+    "name": "asset",
+    "type": "string (query, lowercase)",
+    "required": true,
+    "example": "btc"
+   }
+  ],
+  "request_body": {
+   "asset": "btc",
+   "source": "deribit",
+   "legs": [
+    {
+     "instrument": "BTC-9OCT26-82000-C",
+     "direction": "long|short"
+    }
+   ],
+   "entry_ts_ms": 1791273600000,
+   "exit_rule": "fixed_ts|dte_exit|pct_profit|loss_stop",
+   "exit_ts_ms": "(fixed_ts)",
+   "exit_pct_profit": "(pct_profit, fraction e.g. 0.5)",
+   "exit_dte": "(dte_exit, int)",
+   "exit_loss_type": "(loss_stop) pct_premium|mult_premium",
+   "exit_loss_value": "(loss_stop, float)",
+   "fill_mode": "mark|bidask",
+   "apply_fees": false
+  }
+ },
+ {
+  "path": "/api/backtest/v2/hedge",
+  "method": "POST",
+  "group": "backtest",
+  "description": "Delta-hedge backtest (v2). Called once with {} body: 401 => requires bearer token.",
+  "notes": "",
+  "pages": [
+   "delta-hedge",
+   "backtest"
+  ],
+  "auth_required": true,
+  "status": 401,
+  "latency_ms": 257,
+  "size_bytes": 26,
+  "response_shape": "{detail:str} (401 Missing token)",
+  "params": [],
+  "request_body": "{spec:{...v2 backtest spec},...extra}  (exact spec not recoverable from bundle without login flows)"
+ },
+ {
+  "path": "/api/auth/sync",
+  "method": "POST",
+  "group": "excluded",
+  "description": "excluded: requires account. Auth0 -> backend session sync (Bearer + credentials:include); returns {role}",
+  "notes": "not called",
+  "pages": [],
+  "auth_required": true,
+  "status": null,
+  "latency_ms": null,
+  "size_bytes": null,
+  "response_shape": null,
+  "params": []
+ },
+ {
+  "path": "/api/positions/price",
+  "method": "POST",
+  "group": "excluded",
+  "description": "excluded: requires account. price a saved position {asset,source,legs}",
+  "notes": "not called",
+  "pages": [],
+  "auth_required": true,
+  "status": null,
+  "latency_ms": null,
+  "size_bytes": null,
+  "response_shape": null,
+  "params": []
+ },
+ {
+  "path": "/api/alerts",
+  "method": "GET",
+  "group": "excluded",
+  "description": "excluded: requires account. user alerts feed (limit,type,asset)",
+  "notes": "not called",
+  "pages": [],
+  "auth_required": true,
+  "status": null,
+  "latency_ms": null,
+  "size_bytes": null,
+  "response_shape": null,
+  "params": []
+ },
+ {
+  "path": "/api/feedback",
+  "method": "POST",
+  "group": "excluded",
+  "description": "excluded: requires account. public feedback form {message,name,email,website,page}; write endpoint, not called",
+  "notes": "not called",
+  "pages": [],
+  "auth_required": true,
+  "status": null,
+  "latency_ms": null,
+  "size_bytes": null,
+  "response_shape": null,
+  "params": []
+ },
+ {
+  "path": "/api/posts/{id}",
+  "method": "GET",
+  "group": "posts",
+  "description": "Single post by id (list is empty so id format unknown). Not called.",
+  "notes": "untested: /api/posts returns {posts:[]}",
+  "pages": [
+   "posts/:date"
+  ],
+  "auth_required": false,
+  "status": null,
+  "latency_ms": null,
+  "size_bytes": null,
+  "response_shape": null,
+  "params": [
+   {
+    "name": "id",
+    "type": "path string",
+    "required": true
+   }
+  ]
+ }
+]
